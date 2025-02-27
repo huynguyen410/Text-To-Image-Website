@@ -24,7 +24,7 @@ const updateImageCard = (imgDataArray) => {
 
 const generateAiImages = async (userPrompt, userStyle, userImgQuantity) => { //Thêm userStyle
     try {
-        const HUGGINGFACE_API_TOKEN = ""; // Thay thế bằng token của bạn
+        const HUGGINGFACE_API_TOKEN = "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"; // Thay thế bằng token của bạn
         const MODEL_ID = "stabilityai/stable-diffusion-3.5-large"; // Thay thế bằng model ID bạn chọn
 
         // Tạo các promise cho tất cả các ảnh (bao gồm cả ảnh đầu tiên)
