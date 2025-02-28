@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +10,8 @@
     <script src="../js/script.js" defer></script>
     <script src="../js/generate_image.js" defer></script>
 </head>
-
 <body>
+    <!-- Navbar (unchanged) -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="../src/index.html">AI Image Generator</a>
@@ -38,6 +37,7 @@
         </div>
     </nav>
 
+    <!-- Image Generator Section -->
     <section class="image_generator">
         <div class="content">
             <h1>AI Image Generator</h1>
@@ -46,6 +46,13 @@
             <form action="#" class="generate_form">
                 <input type="text" class="prompt_input" placeholder="Describe your desired images in words" required>
 
+                <!-- Model Selection Checkboxes -->
+                <div class="model_selection" style="margin-bottom: 1rem;">
+                    <label><input type="checkbox" name="model" value="stabilityai/stable-diffusion-3.5-large" checked> Stable Diffusion 3.5</label>
+                    <label><input type="checkbox" name="model" value="black-forest-labs/FLUX.1-dev"> Flux1</label>
+                    <label><input type="checkbox" name="model" value="strangerzonehf/Flux-Midjourney-Mix2-LoRA"> Flux-Midjourney</label>
+                </div>
+
                 <div class="control">
                     <select class="style_select">
                         <option value="realistic">Realistic</option>
@@ -53,9 +60,7 @@
                         <option value="cartoon">Cartoon</option>
                         <option value="abstract">Abstract</option>
                         <option value="photorealistic">Photorealistic</option>
-                        <!-- Thêm các style khác vào đây -->
                     </select>
-
                     <select class="img_quantity">
                         <option value="1">1 Image</option>
                         <option value="2">2 Images</option>
@@ -68,45 +73,39 @@
         </div>
     </section>
 
-    <!-- images section start from here -->
-    <section class="img_gallery">
-        <div class="img_card">
-            <img src="../images/img-1.jpg" alt="image">
-            <a href="#" class="download_btn">
-                <img src="../images/download.svg" alt="download icon">
-            </a>
-        </div>
-        <div class="img_card ">
-            <img src="../images/img-2.jpg" alt="image">
-            <a href="#" class="download_btn">
-                <img src="../images/download.svg" alt="download icon">
-            </a>
-        </div>
-        <div class="img_card">
-            <img src="../images/img-3.jpg" alt="image">
-            <a href="#" class="download_btn">
-                <img src="../images/download.svg" alt="download icon">
-            </a>
-        </div>
-        <div class="img_card">
-            <img src="../images/img-4.jpg" alt="image">
-            <a href="#" class="download_btn">
-                <img src="../images/download.svg" alt="download icon">
-            </a>
-        </div>
-    </section>
+        <!-- Image Gallery with Dropdown -->
+        <section class="img_gallery">
+            <div class="model-results" id="model-results">
+                <!-- Container mặc định hiển thị 4 ảnh ban đầu -->
+                <div class="default-images" id="default-images">
+                    <div class="img_container" id="default-container"></div>
+                </div>
+                <!-- Các nhóm mô hình, ẩn ban đầu -->
+                <div class="model-group" id="stable-diffusion-group" style="display: none;">
+                    <h3>Stable Diffusion 3.5</h3>
+                    <div class="img_container" id="stable-diffusion-container"></div>
+                </div>
+                <div class="model-group" id="flux1-group" style="display: none;">
+                    <h3>Flux1</h3>
+                    <div class="img_container" id="flux1-container"></div>
+                </div>
+                <div class="model-group" id="flux-midjourney-group" style="display: none;">
+                    <h3>Flux-Midjourney</h3>
+                    <div class="img_container" id="flux-midjourney-container"></div>
+                </div>
+            </div>
+        </section>
 
-    <!-- Login/Register Modal -->
-    <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel"
-        aria-hidden="true">
+    <!-- Login/Register Modal (unchanged) -->
+    <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="loginRegisterModalLabel"></h5> <!-- Sửa đổi tiêu đề -->
+                    <h5 class="modal-title" id="loginRegisterModalLabel"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="login-form"> <!-- Hiển thị mặc định -->
+                    <form id="login-form">
                         <div class="mb-3">
                             <label for="login-username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="login-username" required>
@@ -116,11 +115,9 @@
                             <input type="password" class="form-control" id="login-password" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
-                        <button type="button" class="btn btn-secondary" id="show-register-form">Need an account?
-                            Register</button>
+                        <button type="button" class="btn btn-secondary" id="show-register-form">Need an account? Register</button>
                     </form>
-
-                    <form id="register-form"  style="display: none;"> <!-- Ẩn mặc định -->
+                    <form id="register-form" style="display: none;">
                         <div class="mb-3">
                             <label for="register-username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="register-username" required>
@@ -134,13 +131,11 @@
                             <input type="email" class="form-control" id="register-email">
                         </div>
                         <button type="submit" class="btn btn-primary">Register</button>
-                        <button type="button" class="btn btn-secondary" id="show-login-form">Already have an account?
-                            Login</button>
+                        <button type="button" class="btn btn-secondary" id="show-login-form">Already have an account? Login</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </body>
-
 </html>
