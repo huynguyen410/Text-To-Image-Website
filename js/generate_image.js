@@ -1,84 +1,170 @@
-// Phần tạo ảnh
 const generateForm = document.querySelector(".generate_form");
 const generateBtn = document.querySelector(".generate_btn");
-const imageGallery = document.querySelector(".img_gallery");
 let isImageGenerating = false;
 
-const updateImageCard = (imgDataArray) => {
-    imgDataArray.forEach((imgObject, index) => {
-        const imgCard = imageGallery.querySelectorAll(".img_card")[index];
-        const imgElement = imgCard.querySelector("img");
-        const downloadBtn = imgCard.querySelector(".download_btn");
+// Store generated images by model
+let generatedImages = {
+    "stabilityai/stable-diffusion-3.5-large": [],
+    "black-forest-labs/FLUX.1-dev": [],
+    "strangerzonehf/Flux-Midjourney-Mix2-LoRA": []
+};
 
-        // Sử dụng URL.createObjectURL thay vì base64
-        const aiGeneratedImage = URL.createObjectURL(new Blob([new Uint8Array(atob(imgObject.b64_json).split("").map(char => char.charCodeAt(0)))], { type: 'image/jpeg' }));
-        imgElement.src = aiGeneratedImage;
+// Hiển thị 4 ảnh mặc định khi tải trang
+const showDefaultImages = () => {
+    const defaultContainer = document.querySelector("#default-container");
+    defaultContainer.innerHTML = "";
+    const defaultImages = [
+        "../images/img-1.jpg",
+        "../images/img-2.jpg",
+        "../images/img-3.jpg",
+        "../images/img-4.jpg"
+    ];
 
-        imgElement.onload = () => {
-            imgCard.classList.remove("loading");
-            downloadBtn.setAttribute("href", aiGeneratedImage);
-            downloadBtn.setAttribute("download", `${new Date().getTime()}.jpg`);
+    defaultImages.forEach((url, index) => {
+        const imgCard = createImageCard(url, index);
+        defaultContainer.appendChild(imgCard);
+    });
+};
+
+// Cập nhật container dựa trên các mô hình được chọn
+const updateImageContainer = (selectedModels) => {
+    const stableDiffusionGroup = document.querySelector("#stable-diffusion-group");
+    const flux1Group = document.querySelector("#flux1-group");
+    const fluxMidjourneyGroup = document.querySelector("#flux-midjourney-group");
+    const defaultImages = document.querySelector("#default-images");
+
+    // Ẩn ảnh mặc định (đã ẩn từ handleImageGeneration, nhưng để chắc chắn)
+    defaultImages.style.display = "none";
+
+    // Ẩn tất cả nhóm mô hình trước
+    stableDiffusionGroup.style.display = "none";
+    flux1Group.style.display = "none";
+    fluxMidjourneyGroup.style.display = "none";
+
+    // Xóa nội dung cũ trong container
+    document.querySelector("#stable-diffusion-container").innerHTML = "";
+    document.querySelector("#flux1-container").innerHTML = "";
+    document.querySelector("#flux-midjourney-container").innerHTML = "";
+
+    // Hiển thị chỉ các mô hình được chọn
+    selectedModels.forEach(modelId => {
+        if (modelId === "stabilityai/stable-diffusion-3.5-large") {
+            stableDiffusionGroup.style.display = "flex";
+            generatedImages[modelId].forEach((imgObject, index) => {
+                const imgCard = createImageCard(imgObject.url, index);
+                document.querySelector("#stable-diffusion-container").appendChild(imgCard);
+            });
+        } else if (modelId === "black-forest-labs/FLUX.1-dev") {
+            flux1Group.style.display = "flex";
+            generatedImages[modelId].forEach((imgObject, index) => {
+                const imgCard = createImageCard(imgObject.url, index);
+                document.querySelector("#flux1-container").appendChild(imgCard);
+            });
+        } else if (modelId === "strangerzonehf/Flux-Midjourney-Mix2-LoRA") {
+            fluxMidjourneyGroup.style.display = "flex";
+            generatedImages[modelId].forEach((imgObject, index) => {
+                const imgCard = createImageCard(imgObject.url, index);
+                document.querySelector("#flux-midjourney-container").appendChild(imgCard);
+            });
         }
     });
-}
+};
 
-const generateAiImages = async (userPrompt, userStyle, userImgQuantity) => { //Thêm userStyle
+// Hàm tạo img_card để tái sử dụng
+const createImageCard = (url, index) => {
+    const imgCard = document.createElement("div");
+    imgCard.classList.add("img_card");
+    const imgElement = document.createElement("img");
+    imgElement.src = url;
+    const downloadBtn = document.createElement("a");
+    downloadBtn.classList.add("download_btn");
+    downloadBtn.href = url;
+    downloadBtn.download = `${new Date().getTime()}_${index}.jpg`;
+    downloadBtn.innerHTML = `<img src="../images/download.svg" alt="download icon">`;
+
+    imgCard.appendChild(imgElement);
+    imgCard.appendChild(downloadBtn);
+    return imgCard;
+};
+
+const generateSingleImage = async (modelId, userPrompt, userStyle, apiToken) => {
     try {
-        const HUGGINGFACE_API_TOKEN = ""; // Thay thế bằng token của bạn
-        const MODEL_ID = "stabilityai/stable-diffusion-3.5-large"; // Thay thế bằng model ID bạn chọn
+        const response = await fetch(`https://api-inference.huggingface.co/models/${modelId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiToken}`,
+            },
+            body: JSON.stringify({
+                inputs: `${userPrompt}, ${userStyle}`,
+                options: {
+                    wait_for_model: true,
+                    use_cache: false
+                },
+            }),
+        });
 
-        // Tạo các promise cho tất cả các ảnh (bao gồm cả ảnh đầu tiên)
-        const imagePromises = [];
-        for (let i = 0; i < userImgQuantity; i++) {
-            imagePromises.push(
-                fetch(`https://api-inference.huggingface.co/models/${MODEL_ID}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${HUGGINGFACE_API_TOKEN}`,
-                    },
-                    body: JSON.stringify({
-                        inputs: `${userPrompt}, ${userStyle}`, // Kết hợp prompt và style
-                        options: {
-                            wait_for_model: true,
-                            use_cache: false
-                        },
-                    }),
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.json().then(errorData => {
-                                throw new Error(`Failed to generate image: ${errorData.error}`);
-                            });
-                        }
-                        return response.blob();
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        return null; // Trả về null cho ảnh bị lỗi
-                    })
-            );
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to generate image with ${modelId}: ${errorData.error || 'Unknown error'}`);
         }
 
-        // Chờ tất cả các promise hoàn thành
-        const imageBlobs = await Promise.all(imagePromises);
+        return await response.blob();
+    } catch (error) {
+        console.error(error.message);
+        return null;
+    }
+};
 
-        // Lọc bỏ các ảnh bị lỗi (có giá trị null)
-        const validImageBlobs = imageBlobs.filter(blob => blob !== null);
+const generateAiImages = async (userPrompt, userStyle, userImgQuantity, selectedModels) => {
+    try {
+        const HUGGINGFACE_API_TOKEN = "";
+        let errorMessages = [];
 
-        // Chuyển đổi các blob hợp lệ sang base64 và lưu vào lịch sử
-        const imgDataArray = await Promise.all(validImageBlobs.map(async (blob) => {
-            const b64_json = await blobToBase64(blob);
-            // console.log("Data trước khi gửi:", b64_json); 
-            saveImageToHistory(userPrompt, userStyle, b64_json, blob.size); // Pass blob size
-            return { b64_json: b64_json };
-        }));
+        Object.keys(generatedImages).forEach(model => generatedImages[model] = []);
 
+        for (const MODEL_ID of selectedModels) {
+            const imgDataArray = [];
+            console.log(`Generating ${userImgQuantity} images for ${MODEL_ID}...`);
 
-        updateImageCard(imgDataArray);
+            for (let i = 0; i < userImgQuantity; i++) {
+                let blob = null;
+                let retries = 0;
+                const maxRetries = 3;
+
+                while (blob === null && retries < maxRetries) {
+                    blob = await generateSingleImage(MODEL_ID, userPrompt, userStyle, HUGGINGFACE_API_TOKEN);
+                    if (blob === null) {
+                        retries++;
+                        console.warn(`Retry ${retries}/${maxRetries} for image ${i + 1} of ${MODEL_ID}`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                }
+
+                if (blob) {
+                    const b64_json = await blobToBase64(blob);
+                    const url = URL.createObjectURL(blob);
+                    imgDataArray.push({ url });
+                    saveImageToHistory(userPrompt, userStyle, b64_json, blob.size, MODEL_ID);
+                } else {
+                    console.error(`Failed to generate image ${i + 1} for ${MODEL_ID} after ${maxRetries} retries`);
+                    errorMessages.push(`Model ${MODEL_ID} failed to generate image ${i + 1}`);
+                }
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+            generatedImages[MODEL_ID] = imgDataArray;
+            console.log(`${MODEL_ID} generated ${imgDataArray.length} images out of ${userImgQuantity}`);
+        }
+
+        updateImageContainer(selectedModels);
+
+        if (errorMessages.length > 0) {
+            alert(`Some images failed to generate:\n${errorMessages.join('\n')}`);
+        }
 
     } catch (error) {
-        alert(error.message);
+        alert(`Error: ${error.message}`);
     } finally {
         generateBtn.removeAttribute("disabled");
         generateBtn.innerText = "Generate";
@@ -86,7 +172,6 @@ const generateAiImages = async (userPrompt, userStyle, userImgQuantity) => { //T
     }
 };
 
-// Hàm chuyển đổi blob sang base64 (cần thiết để hiển thị ảnh)
 const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
         const worker = new Worker(URL.createObjectURL(new Blob([`
@@ -95,7 +180,7 @@ const blobToBase64 = (blob) => {
             fileReader.onload = function(e) {
               self.postMessage(e.target.result.split(',')[1]);
             };
-            fileReader.onerror = function(error) { // Thêm xử lý lỗi
+            fileReader.onerror = function(error) {
               self.postMessage(null);
             };
             fileReader.readAsDataURL(event.data);
@@ -104,9 +189,8 @@ const blobToBase64 = (blob) => {
 
         worker.onmessage = function (event) {
             const base64String = event.data;
-            // console.log("Base64 String:", base64String); 
             resolve(base64String);
-            worker.terminate(); // Giải phóng worker sau khi sử dụng
+            worker.terminate();
         };
 
         worker.onerror = function (error) {
@@ -120,70 +204,67 @@ const blobToBase64 = (blob) => {
 
 const handleImageGeneration = (e) => {
     e.preventDefault();
-   
-    // Kiểm tra trạng thái đăng nhập
+
     getUserInfo().then(userInfo => {
         if (!userInfo.success) {
             alert("You must be logged in to generate images.");
-            return; // Không tạo ảnh nếu chưa đăng nhập
+            return;
         }
 
-     if (isImageGenerating) return;
-    // Get user input and image quantity values
-    const userPrompt = document.querySelector(".prompt_input").value; // Sửa đổi cách lấy prompt
-    const userStyle = document.querySelector(".style_select").value; // Lấy style từ select
-    const userImgQuantity = parseInt(document.querySelector(".img_quantity").value); // Lấy số lượng ảnh từ select
+        if (isImageGenerating) return;
 
-    // Disable the generate button, update its text, and set the flag
-    generateBtn.setAttribute("disabled", true);
-    generateBtn.innerText = "Generating";
-    isImageGenerating = true;
+        const userPrompt = document.querySelector(".prompt_input").value;
+        const userStyle = document.querySelector(".style_select").value;
+        const userImgQuantity = parseInt(document.querySelector(".img_quantity").value);
+        const selectedModels = Array.from(document.querySelectorAll('input[name="model"]:checked')).map(cb => cb.value);
 
-    // Lấy các thẻ img_card hiện có hoặc tạo mới nếu không đủ
-    let imgCards = imageGallery.querySelectorAll(".img_card");
-    if (imgCards.length < userImgQuantity) {
-        const additionalCards = Array.from({ length: userImgQuantity - imgCards.length }, () =>
-            `<div class="img_card loading">
-            <img src="../images/loader.svg" alt="AI generated image">
-            <a class="download_btn" href="#">
-              <img src="../images/download.svg" alt="download icon">
-            </a>
-          </div>`
-        ).join("");
-        imageGallery.innerHTML += additionalCards;
-        imgCards = imageGallery.querySelectorAll(".img_card");
-    } else if (imgCards.length > userImgQuantity) {
-        // Xóa các thẻ thừa
-        for (let i = userImgQuantity; i < imgCards.length; i++) {
-            imgCards[i].remove();
+        if (selectedModels.length === 0) {
+            alert("Please select at least one model.");
+            return;
         }
-        imgCards = imageGallery.querySelectorAll(".img_card");
-    }
 
-    // Đặt trạng thái loading cho tất cả các thẻ
-    imgCards.forEach(card => {
-        card.classList.add("loading");
-        const img = card.querySelector("img");
-        img.src = "../images/loader.svg"; //Sửa lại đường dẫn
+        generateBtn.setAttribute("disabled", true);
+        generateBtn.innerText = "Generating";
+        isImageGenerating = true;
+
+        // Ẩn ảnh mặc định ngay lập tức
+        document.querySelector("#default-images").style.display = "none";
+
+        // Hiển thị loading chỉ cho các mô hình được chọn và bật nhóm mô hình tương ứng
+        selectedModels.forEach(modelId => {
+            if (modelId === "stabilityai/stable-diffusion-3.5-large") {
+                const group = document.querySelector("#stable-diffusion-group");
+                group.style.display = "flex";
+                document.querySelector("#stable-diffusion-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+            } else if (modelId === "black-forest-labs/FLUX.1-dev") {
+                const group = document.querySelector("#flux1-group");
+                group.style.display = "flex";
+                document.querySelector("#flux1-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+            } else if (modelId === "strangerzonehf/Flux-Midjourney-Mix2-LoRA") {
+                const group = document.querySelector("#flux-midjourney-group");
+                group.style.display = "flex";
+                document.querySelector("#flux-midjourney-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+            }
+        });
+
+        generateAiImages(userPrompt, userStyle, userImgQuantity, selectedModels);
     });
-
-    generateAiImages(userPrompt, userStyle, userImgQuantity); //Gọi hàm tạo ảnh
-});
-}
+};
 
 generateForm.addEventListener("submit", handleImageGeneration);
 
-const saveImageToHistory = async (prompt, style, image_data, blobSize) => { // Get blob size
+const saveImageToHistory = async (prompt, style, image_data, blobSize, modelId) => {
     try {
         const formData = new FormData();
         formData.append('prompt', prompt);
         formData.append('style', style);
         formData.append('image_data', image_data);
-        formData.append('blob_size', blobSize); // Append blob size
+        formData.append('blob_size', blobSize);
+        formData.append('model_id', modelId);
 
         const response = await fetch("save_image_history.php", {
             method: "POST",
-            body: formData, // Don't set Content-Type
+            body: formData,
         });
 
         const data = await response.json();
@@ -194,3 +275,6 @@ const saveImageToHistory = async (prompt, style, image_data, blobSize) => { // G
         console.error("Error saving image to history:", error);
     }
 };
+
+// Gọi hàm hiển thị ảnh mặc định khi tải trang
+document.addEventListener("DOMContentLoaded", showDefaultImages);
