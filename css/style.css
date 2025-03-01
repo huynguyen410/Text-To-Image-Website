@@ -361,6 +361,11 @@
     justify-content: center;
 }
 
+.suggestion-btn.active {
+    background-color: #007bff; /* Màu xanh dương đậm */
+    color: white;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 760px) {
     .model-results {

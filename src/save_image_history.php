@@ -17,6 +17,7 @@ $prompt = mysqli_real_escape_string($conn, $_POST['prompt']);
 $style = mysqli_real_escape_string($conn, $_POST['style']);
 $image_data = $_POST['image_data'];
 $blob_size = $_POST['blob_size']; // Get blob size
+$model_id = mysqli_real_escape_string($conn, $_POST['model_id']); // Get model ID
 
 // Kiểm tra kích thước Blob
 if ($blob_size > 2000000) { // 2MB
@@ -53,71 +54,79 @@ if ($decoded_image === false) {
 $success = file_put_contents($file, $decoded_image);
 
 if ($success) {
-        // Lấy số lượng ảnh đã tạo
-        $sql_count = "SELECT COUNT(DISTINCT created_at) AS total FROM image_history WHERE user_id = ?";
-        $stmt_count = mysqli_prepare($conn, $sql_count);
-        mysqli_stmt_bind_param($stmt_count, "i", $user_id);
-        mysqli_stmt_execute($stmt_count);
-        $result_count = mysqli_stmt_get_result($stmt_count);
-        $data_count = mysqli_fetch_assoc($result_count);
-        $total_creation = $data_count['total'];
-        mysqli_stmt_close($stmt_count);
+      // Tạo creation_id duy nhất
+      $creation_id = uniqid();
 
-        // Nếu số lượng ảnh > 5 thì tiến hành xóa ảnh cũ nhất
-        if ($total_creation > 5) {
-            $sql_get_oldest = "SELECT id, image_url, created_at FROM image_history WHERE user_id = ? ORDER BY created_at ASC LIMIT 1";
-            $stmt_get_oldest = mysqli_prepare($conn, $sql_get_oldest);
-            mysqli_stmt_bind_param($stmt_get_oldest, "i", $user_id);
-            mysqli_stmt_execute($stmt_get_oldest);
-            $result_oldest = mysqli_stmt_get_result($stmt_get_oldest);
+        // Giới hạn số lần tạo ảnh gần nhất
+        $max_history_count = 5;
 
-             if ($row_oldest = mysqli_fetch_assoc($result_oldest)) {
-                $oldest_creation_time = $row_oldest['created_at'];
+        // Lấy số lượng lần tạo ảnh của người dùng
+        $sql_count_history = "SELECT COUNT(DISTINCT creation_id) AS history_count FROM image_history WHERE user_id = ?";
+        $stmt_count_history = mysqli_prepare($conn, $sql_count_history);
+        mysqli_stmt_bind_param($stmt_count_history, "i", $user_id);
+        mysqli_stmt_execute($stmt_count_history);
+        $result_count_history = mysqli_stmt_get_result($stmt_count_history);
+        $row_count_history = mysqli_fetch_assoc($result_count_history);
+        $history_count = $row_count_history['history_count'];
+        mysqli_stmt_close($stmt_count_history);
 
-                //Lấy tất cả ảnh CÙNG created_at để xoá
-                $sql_get_all_oldest = "SELECT id, image_url FROM image_history WHERE user_id = ? AND created_at = ?";
-                $stmt_get_all_oldest = mysqli_prepare($conn, $sql_get_all_oldest);
-                mysqli_stmt_bind_param($stmt_get_all_oldest, "is", $user_id, $oldest_creation_time);
-                mysqli_stmt_execute($stmt_get_all_oldest);
-                $result_all_oldest = mysqli_stmt_get_result($stmt_get_all_oldest);
+        // Nếu vượt quá giới hạn, xóa ảnh cũ nhất
+        if ($history_count >= $max_history_count) {
+            // Lấy creation_id của lần tạo ảnh cũ nhất
+            $sql_get_oldest_creation_id = "SELECT MIN(created_at) AS oldest_created_at FROM image_history WHERE user_id = ?";
+            $stmt_get_oldest_creation_id = mysqli_prepare($conn, $sql_get_oldest_creation_id);
+            mysqli_stmt_bind_param($stmt_get_oldest_creation_id, "i", $user_id);
+            mysqli_stmt_execute($stmt_get_oldest_creation_id);
+            $result_oldest_creation_id = mysqli_stmt_get_result($stmt_get_oldest_creation_id);
+            $row_oldest_creation_id = mysqli_fetch_assoc($result_oldest_creation_id);
+            $oldest_created_at = $row_oldest_creation_id['oldest_created_at'];
+            mysqli_stmt_close($stmt_get_oldest_creation_id);
 
-                  while($row_all_oldest = mysqli_fetch_assoc($result_all_oldest)) {
-                      $oldest_id = $row_all_oldest['id'];
-                      $oldest_image_url = $row_all_oldest['image_url'];
+            // Lấy danh sách các ảnh cũ nhất
+            $sql_get_oldest_images = "SELECT id, image_url FROM image_history WHERE user_id = ? AND created_at = ?";
+            $stmt_get_oldest_images = mysqli_prepare($conn, $sql_get_oldest_images);
+            mysqli_stmt_bind_param($stmt_get_oldest_images, "is", $user_id, $oldest_created_at);
+            mysqli_stmt_execute($stmt_get_oldest_images);
+            $result_oldest_images = mysqli_stmt_get_result($stmt_get_oldest_images);
 
-                      // Xóa file ảnh cũ
-                      $oldest_file = $_SERVER['DOCUMENT_ROOT'] . $oldest_image_url;
-                      if (file_exists($oldest_file)) {
-                          unlink($oldest_file);
-                      }
-                      // Xóa bản ghi khỏi cơ sở dữ liệu
-                      $sql_delete_oldest = "DELETE FROM image_history WHERE id = ?";
-                      $stmt_delete_oldest = mysqli_prepare($conn, $sql_delete_oldest);
-                      mysqli_stmt_bind_param($stmt_delete_oldest, "i", $oldest_id);
-                      mysqli_stmt_execute($stmt_delete_oldest);
-                       mysqli_stmt_close($stmt_delete_oldest);
-                  }
-                   mysqli_stmt_close($stmt_get_all_oldest);
+            // Duyệt và xóa từng ảnh
+            while ($row_oldest_images = mysqli_fetch_assoc($result_oldest_images)) {
+                $oldest_id = $row_oldest_images['id'];
+                $oldest_image_url = $row_oldest_images['image_url'];
+
+                // Xóa file ảnh cũ
+                $oldest_file = $_SERVER['DOCUMENT_ROOT'] . $oldest_image_url;
+                if (file_exists($oldest_file)) {
+                    unlink($oldest_file);
+                }
+
+                // Xóa bản ghi khỏi cơ sở dữ liệu
+                $sql_delete_oldest = "DELETE FROM image_history WHERE id = ?";
+                $stmt_delete_oldest = mysqli_prepare($conn, $sql_delete_oldest);
+                mysqli_stmt_bind_param($stmt_delete_oldest, "i", $oldest_id);
+                mysqli_stmt_execute($stmt_delete_oldest);
+                 mysqli_stmt_close($stmt_delete_oldest);
             }
-              mysqli_stmt_close($stmt_get_oldest);
+              mysqli_stmt_close($stmt_get_oldest_images);
         }
 
         // Chèn dữ liệu vào bảng image_history
-        $sql = "INSERT INTO image_history (user_id, prompt, style, image_url, created_at) VALUES (?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO image_history (user_id, prompt, style, image_url, created_at, model, creation_id) VALUES (?, ?, ?, ?, NOW(), ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "isss", $user_id, $prompt, $style, $image_url);
+        mysqli_stmt_bind_param($stmt, "isssss", $user_id, $prompt, $style, $image_url, $model_id, $creation_id);
 
         if (mysqli_stmt_execute($stmt)) {
             echo json_encode(['success' => true, 'message' => 'Image saved to history']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error: ' . mysqli_error($conn)]);
         }
-          mysqli_stmt_close($stmt);
+       mysqli_stmt_close($stmt);
+
     } else {
         $error = error_get_last();
         error_log("file_put_contents error: " . print_r($error, true));
         echo json_encode(['success' => false, 'message' => 'Failed to save image file: ' . $error['message']]);
-    }   
+    }
 
-mysqli_close($conn);
+    mysqli_close($conn);
 ?>

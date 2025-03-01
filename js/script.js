@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const registerForm = document.getElementById('register-form');
     const showLoginFormButton = document.getElementById('show-login-form');
     const showRegisterFormButton = document.getElementById('show-register-form');
+    const historyLink = document.getElementById('history-link');
 
     // Hàm hiển thị form đăng nhập
     const showLoginForm = () => {
@@ -56,10 +57,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     if (data.success) {
                         hideLogout();
-                        // Xóa thông tin đăng nhập khỏi Local Storage
-                        localStorage.removeItem('username');
+                        localStorage.removeItem('username'); // Xóa khỏi Local Storage
                         checkLoginStatus(); // Cập nhật giao diện
-                        alert('Logout successful');
+                        alert('Logout successfully');
+                        window.location.href = 'index.html';// Chuyển hướng đến trang chủ
+                        
                     } else {
                         alert('Logout failed: ' + data.message);
                     }
@@ -144,9 +146,34 @@ document.addEventListener('DOMContentLoaded', function () {
             showLoginForm();
         });
     }
+
+    // Xử lý sự kiện click trên liên kết "History"
+    historyLink.addEventListener('click', (e) => {
+        e.preventDefault(); // Ngăn chặn chuyển hướng trang
+
+        // Kiểm tra trạng thái đăng nhập
+        getUserInfo().then(userInfo => {
+            if (!userInfo.success) {
+                alert("You must be logged in to view history.");
+                return; // Không chuyển hướng nếu chưa đăng nhập
+            }
+
+            // Chuyển hướng đến trang lịch sử
+            window.location.href = 'image_history.php';
+        });
+    });
+
+    // Khởi tạo Tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl =>  {
+    const tooltip = new bootstrap.Tooltip(tooltipTriggerEl);
+       tooltipTriggerEl.addEventListener('mouseleave', function () {
+        tooltip.hide();
+    })
+});
 });
 
-// Các hàm gọi API (thêm vào file script.js)
+// Các hàm gọi API ()
 const registerUser = async (username, password, email) => {
     const formData = new URLSearchParams();
     formData.append('username', username);
@@ -202,19 +229,24 @@ const loadHistory = async () => {
             const history = data.history;
             let historyHTML = "";
 
-            history.forEach(item => {
-                historyHTML += `
-                    <div class="col-md-3 mb-3">
-                        <div class="card">
-                            <img src="${item.image_url}" class="card-img-top" alt="Image" width="150">
-                            <div class="card-body">
-                                <h5 class="card-title">Prompt: ${item.prompt}</h5>
-                                <p class="card-text">Style: ${item.style}</p>
+            if (history.length > 0) { // Kiểm tra xem có ảnh trong lịch sử hay không
+                history.forEach(item => {
+                    historyHTML += `
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <img src="${item.image_url}" class="card-img-top" alt="Image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Prompt: ${item.prompt}</h5>
+                                    <p class="card-text">Style: ${item.style}</p>
+                                    <p class="card-text">Model: ${item.model}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } else {
+                historyHTML = "<p>No images generated yet.</p>"; // Hiển thị thông báo nếu không có ảnh
+            }
 
             document.getElementById("image-history-container").innerHTML = historyHTML;
         } else {
@@ -224,4 +256,4 @@ const loadHistory = async () => {
         console.error("Error loading image history:", error);
         alert("Error loading image history.");
     }
-}
+};

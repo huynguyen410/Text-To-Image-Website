@@ -1,6 +1,7 @@
 const generateForm = document.querySelector(".generate_form");
 const generateBtn = document.querySelector(".generate_btn");
 let isImageGenerating = false;
+const promptInput = document.querySelector(".prompt_input"); // Lấy prompt input
 
 // Store generated images by model
 let generatedImages = {
@@ -213,7 +214,23 @@ const handleImageGeneration = (e) => {
 
         if (isImageGenerating) return;
 
-        const userPrompt = document.querySelector(".prompt_input").value;
+        // Lấy prompt từ input field
+        let userPrompt = document.querySelector(".prompt_input").value;
+
+        // Lấy các gợi ý đã chọn
+        const selectedSuggestions = Array.from(document.querySelectorAll('.suggestion-btn.active'))
+            .map(btn => btn.dataset.suggestion);
+
+        // Thêm các gợi ý đã chọn vào prompt
+        if (selectedSuggestions.length > 0) {
+            userPrompt += ', ' + selectedSuggestions.join(', ');
+        }
+         // Kiểm tra nếu cả hai đều trống
+        if (userPrompt.trim() === '' && selectedSuggestions.length === 0) {
+          alert('Please enter a prompt or select a suggestion.');
+          return;
+        }
+
         const userStyle = document.querySelector(".style_select").value;
         const userImgQuantity = parseInt(document.querySelector(".img_quantity").value);
         const selectedModels = Array.from(document.querySelectorAll('input[name="model"]:checked')).map(cb => cb.value);
@@ -275,6 +292,16 @@ const saveImageToHistory = async (prompt, style, image_data, blobSize, modelId) 
         console.error("Error saving image to history:", error);
     }
 };
+
+// Lấy tất cả các nút gợi ý
+const suggestionButtons = document.querySelectorAll('.suggestion-btn');
+
+// Lặp qua từng nút và thêm trình xử lý sự kiện click
+suggestionButtons.forEach(button => {
+    button.addEventListener('click', function() {
+         this.classList.toggle('active');
+    });
+});
 
 // Gọi hàm hiển thị ảnh mặc định khi tải trang
 document.addEventListener("DOMContentLoaded", showDefaultImages);

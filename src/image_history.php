@@ -41,10 +41,20 @@
     </nav>
 
     <div class="container mt-5">
-        <h2>Image History</h2>
+        <h2>Image History <i>(5 latest generations)</i></h2>
+        <hr class="border-2 border-top bg-primary" />
         <div class="row" id="image-history-container">
             <!-- Image history will be displayed here -->
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3">
+        <div class="container">
+            <p class="text-muted">© 2025 AI Image Generator</p>
+            <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging Face</a> |
+            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại học Sài Gòn</a>
+        </div>
+    </footer>
 </body>
 </html>
