@@ -48,40 +48,10 @@
             <form action="#" class="generate_form">
                 <!-- Background Suggestions -->
                 <div class="mb-3">
-                    <!-- <label class="form-label">Background Suggestions:</label><br> -->
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A majestic mountain range">Mountain</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A serene beach at sunset">Beach</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A bustling cityscape at night">City</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A lush green forest">Forest</button>
-                </div>
-
-                <!-- Character Suggestions -->
-                <div class="mb-3">
-                    <!-- <label class="form-label">Character Suggestions:</label><br> -->
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A brave knight in shining armor">Knight</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A powerful wizard with a long beard">Wizard</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A mysterious elf with pointy ears">Elf</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="A cute and cuddly panda bear">Panda</button>
-                </div>
-                <!-- Hairstyle Suggestions -->
-                <div class="mb-3">
-                    <!-- <label class="form-label">Hairstyle Suggestions:</label><br> -->
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="Long hair">Long hair</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="Short hair">Short hair</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="Curly hair">Curly hair</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary suggestion-btn"
-                        data-suggestion="Bald">Bald</button>
+                    <button type="button" class="btn btn-primary" id="showDetailedPromptForm" data-bs-toggle="modal"
+                        data-bs-target="#detailedPromptModal">
+                        Create Detailed Prompt
+                    </button>
                 </div>
 
                 <!-- Model Selection Checkboxes -->
@@ -147,6 +117,48 @@
         </div>
     </section>
 
+    <!-- Detailed Prompt Modal -->
+    <div class="modal fade" id="detailedPromptModal" tabindex="-1" aria-labelledby="detailedPromptModalLabel"
+        data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-modal="true" inert>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailedPromptModalLabel">Create Detailed Prompt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="detailedPromptForm">
+                        <div class="mb-3">
+                            <label for="backgroundInput" class="form-label visually-hidden">Background:</label>
+                            <input type="text" class="form-control" id="backgroundInput"
+                                placeholder="Background: (e.g., A majestic mountain range)">
+                        </div>
+                        <div class="mb-3">
+                            <label for="characterInput" class="form-label visually-hidden">Character:</label>
+                            <input type="text" class="form-control" id="characterInput"
+                                placeholder="Character: (e.g., A brave knight in shining armor)">
+                        </div>
+                        <div class="mb-3">
+                            <label for="hairstyleInput" class="form-label visually-hidden">Hairstyle:</label>
+                            <input type="text" class="form-control" id="hairstyleInput"
+                                placeholder="Hairstyle: (e.g., Long hair)">
+                        </div>
+                        <div class="mb-3">
+                            <label for="skinColorInput" class="form-label visually-hidden">Skin Color:</label>
+                            <input type="text" class="form-control" id="skinColorInput"
+                                placeholder="Skin Color: (e.g., Pale, dark, bronze)">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="generateFromDetails"
+                        data-bs-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Login/Register Modal -->
     <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel"
         aria-hidden="true">
@@ -196,8 +208,10 @@
     <footer class="bg-light text-center py-3">
         <div class="container">
             <p class="text-muted">© 2025 AI Image Generator</p>
-            <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging Face</a> |
-            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại học Sài Gòn</a>
+            <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging
+                Face</a> |
+            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại học
+                Sài Gòn</a>
         </div>
     </footer>
 </body>

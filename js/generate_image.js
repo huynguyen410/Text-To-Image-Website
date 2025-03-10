@@ -2,7 +2,16 @@ const generateForm = document.querySelector(".generate_form");
 const generateBtn = document.querySelector(".generate_btn");
 let isImageGenerating = false;
 const promptInput = document.querySelector(".prompt_input"); // Lấy prompt input
+const detailedPromptModal = document.getElementById('detailedPromptModal');
 
+// Hiển thị/ẩn Detailed Prompt Form
+const showDetailedPromptFormBtn = document.getElementById('showDetailedPromptForm');
+const detailedPromptForm = document.getElementById('detailedPromptForm');
+const backgroundInput = document.getElementById('backgroundInput');
+const characterInput = document.getElementById('characterInput');
+const hairstyleInput = document.getElementById('hairstyleInput');
+const skinColorInput = document.getElementById('skinColorInput');
+const generateFromDetailsBtn = document.getElementById('generateFromDetails');
 // Store generated images by model
 let generatedImages = {
     "stabilityai/stable-diffusion-3.5-large": [],
@@ -215,21 +224,7 @@ const handleImageGeneration = (e) => {
         if (isImageGenerating) return;
 
         // Lấy prompt từ input field
-        let userPrompt = document.querySelector(".prompt_input").value;
-
-        // Lấy các gợi ý đã chọn
-        const selectedSuggestions = Array.from(document.querySelectorAll('.suggestion-btn.active'))
-            .map(btn => btn.dataset.suggestion);
-
-        // Thêm các gợi ý đã chọn vào prompt
-        if (selectedSuggestions.length > 0) {
-            userPrompt += ', ' + selectedSuggestions.join(', ');
-        }
-         // Kiểm tra nếu cả hai đều trống
-        if (userPrompt.trim() === '' && selectedSuggestions.length === 0) {
-          alert('Please enter a prompt or select a suggestion.');
-          return;
-        }
+        let userPrompt = promptInput.value;
 
         const userStyle = document.querySelector(".style_select").value;
         const userImgQuantity = parseInt(document.querySelector(".img_quantity").value);
@@ -292,15 +287,42 @@ const saveImageToHistory = async (prompt, style, image_data, blobSize, modelId) 
         console.error("Error saving image to history:", error);
     }
 };
+let modalInstance;
+// Hiển thị/ẩn Detailed Prompt Form
+showDetailedPromptFormBtn.addEventListener('click', () => {
+    const modalElement = document.getElementById('detailedPromptModal');
+    modalElement.inert = false;
+    modalInstance = new bootstrap.Modal(modalElement);
+    modalInstance.show();
+});
 
-// Lấy tất cả các nút gợi ý
-const suggestionButtons = document.querySelectorAll('.suggestion-btn');
+const resetModal = () => {
+    backgroundInput.value = "";
+    characterInput.value = "";
+    hairstyleInput.value = "";
+    skinColorInput.value = "";
+}
 
-// Lặp qua từng nút và thêm trình xử lý sự kiện click
-suggestionButtons.forEach(button => {
-    button.addEventListener('click', function() {
-         this.classList.toggle('active');
-    });
+//Add resetModal on Close of Modal
+detailedPromptModal.addEventListener('hidden.bs.modal', function (event) {
+    resetModal();
+    // Gỡ bỏ modal khỏi DOM
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = 'auto'; // Thêm dòng này
+    const modalBackdrop = document.querySelector('.modal-backdrop');
+    if (modalBackdrop) {
+        modalBackdrop.remove();
+    }
+});
+
+generateFromDetailsBtn.addEventListener('click', () => {
+    let detailedPrompt = "";
+    if (backgroundInput.value) detailedPrompt += `Background: ${backgroundInput.value}, `;
+    if (characterInput.value) detailedPrompt += `Character: ${characterInput.value}, `;
+    if (hairstyleInput.value) detailedPrompt += `Hairstyle: ${hairstyleInput.value}, `;
+    if (skinColorInput.value) detailedPrompt += `Skin Color: ${skinColorInput.value}, `;
+
+    promptInput.value = detailedPrompt;
 });
 
 // Gọi hàm hiển thị ảnh mặc định khi tải trang
