@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Image Generator</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/script.js" defer></script>
@@ -13,207 +14,212 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="../src/index.html">AI Image Generator</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="image_history.php" id="history-link">History</a>
-                    </li>
-                    <li class="nav-item" id="login-register-link">
-                        <a class="nav-link" href="#" id="login-link" data-bs-toggle="modal"
-                            data-bs-target="#loginRegisterModal">Login</a>
-                    </li>
-                    <span class="nav-link me-2" id="username-display" style="display: none;"></span>
-                    <li class="nav-item" id="logout-link" style="display: none;">
-                        <a class="nav-link" href="#" id="logout-button">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Image Generator Section -->
-    <section class="image_generator">
+    <div class="wrapper">
         <div class="content">
-            <h1>AI Image Generator</h1>
-            <p>Turn Your Imagination into Stunning Visuals in Seconds!</p>
-
-            <form action="#" class="generate_form">
-                <!-- Background Suggestions -->
-                <div class="mb-3">
-                    <button type="button" class="btn btn-primary" id="showDetailedPromptForm" data-bs-toggle="modal"
-                        data-bs-target="#detailedPromptModal">
-                        Create Detailed Prompt
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="../src/index.html">AI Image Generator</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
                     </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="image_history.php" id="history-link">History</a>
+                            </li>
+                            <li class="nav-item" id="login-register-link">
+                                <a class="nav-link" href="#" id="login-link" data-bs-toggle="modal"
+                                    data-bs-target="#loginRegisterModal">Login</a>
+                            </li>
+                            <span class="nav-link me-2" id="username-display" style="display: none;"></span>
+                            <li class="nav-item" id="logout-link" style="display: none;">
+                                <a class="nav-link" href="#" id="logout-button">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+            </nav>
 
-                <!-- Model Selection Checkboxes -->
-                <div class="model_selection" style="margin-bottom: 1rem;">
-                    <label data-bs-toggle="tooltip" data-bs-placement="top"
-                        title="General purpose, high quality image generation.">
-                        <input type="checkbox" name="model" value="stabilityai/stable-diffusion-3.5-large" checked>
-                        Stable Diffusion 3.5
-                    </label>
-                    <label data-bs-toggle="tooltip" data-bs-placement="top"
-                        title="A model specializing in abstract and surreal imagery.">
-                        <input type="checkbox" name="model" value="black-forest-labs/FLUX.1-dev"> Flux1
-                    </label>
-                    <label data-bs-toggle="tooltip" data-bs-placement="top"
-                        title="Combines the aesthetics of Flux with Midjourney's style.">
-                        <input type="checkbox" name="model" value="strangerzonehf/Flux-Midjourney-Mix2-LoRA">
-                        Flux-Midjourney
-                    </label>
-                </div>
+            <!-- Image Generator Section -->
+            <section class="image_generator">
+                <div class="content">
+                    <h1>AI Image Generator</h1>
+                    <p>Turn Your Imagination into Stunning Visuals in Seconds!</p>
 
-                <input type="text" class="prompt_input" placeholder="Describe your desired images in words">
-
-                <div class="control">
-                    <select class="style_select">
-                        <option value="realistic">Realistic</option>
-                        <option value="anime">Anime</option>
-                        <option value="cartoon">Cartoon</option>
-                        <option value="abstract">Abstract</option>
-                        <option value="photorealistic">Photorealistic</option>
-                    </select>
-                    <select class="img_quantity">
-                        <option value="1">1 Image</option>
-                        <option value="2">2 Images</option>
-                        <option value="3">3 Images</option>
-                        <option value="4" selected>4 Images</option>
-                    </select>
-                    <button type="submit" class="generate_btn">Generate</button>
-                </div>
-            </form>
-        </div>
-    </section>
-
-    <!-- Image Gallery with Dropdown -->
-    <section class="img_gallery">
-        <div class="model-results" id="model-results">
-            <!-- Container mặc định hiển thị 4 ảnh ban đầu -->
-            <div class="default-images" id="default-images">
-                <div class="img_container" id="default-container"></div>
-            </div>
-            <!-- Các nhóm mô hình, ẩn ban đầu -->
-            <div class="model-group" id="stable-diffusion-group" style="display: none;">
-                <h3>Stable Diffusion 3.5</h3>
-                <div class="img_container" id="stable-diffusion-container"></div>
-            </div>
-            <div class="model-group" id="flux1-group" style="display: none;">
-                <h3>Flux1</h3>
-                <div class="img_container" id="flux1-container"></div>
-            </div>
-            <div class="model-group" id="flux-midjourney-group" style="display: none;">
-                <h3>Flux-Midjourney</h3>
-                <div class="img_container" id="flux-midjourney-container"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Detailed Prompt Modal -->
-    <div class="modal fade" id="detailedPromptModal" tabindex="-1" aria-labelledby="detailedPromptModalLabel"
-        data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-modal="true" inert>
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="detailedPromptModalLabel">Create Detailed Prompt</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="detailedPromptForm">
+                    <form action="#" class="generate_form">
+                        <!-- Background Suggestions -->
                         <div class="mb-3">
-                            <label for="backgroundInput" class="form-label visually-hidden">Background:</label>
-                            <input type="text" class="form-control" id="backgroundInput"
-                                placeholder="Background: (e.g., A majestic mountain range)">
+                            <button type="button" class="btn btn-primary" id="showDetailedPromptForm"
+                                data-bs-toggle="modal" data-bs-target="#detailedPromptModal">
+                                Create Detailed Prompt
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label for="characterInput" class="form-label visually-hidden">Character:</label>
-                            <input type="text" class="form-control" id="characterInput"
-                                placeholder="Character: (e.g., A brave knight in shining armor)">
+
+                        <!-- Model Selection Checkboxes -->
+                        <div class="model_selection" style="margin-bottom: 1rem;">
+                            <label data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="General purpose, high quality image generation.">
+                                <input type="checkbox" name="model" value="stabilityai/stable-diffusion-3.5-large"
+                                    checked>
+                                Stable Diffusion 3.5
+                            </label>
+                            <label data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="A model specializing in abstract and surreal imagery.">
+                                <input type="checkbox" name="model" value="black-forest-labs/FLUX.1-dev"> Flux1
+                            </label>
+                            <label data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Combines the aesthetics of Flux with Midjourney's style.">
+                                <input type="checkbox" name="model" value="strangerzonehf/Flux-Midjourney-Mix2-LoRA">
+                                Flux-Midjourney
+                            </label>
                         </div>
-                        <div class="mb-3">
-                            <label for="hairstyleInput" class="form-label visually-hidden">Hairstyle:</label>
-                            <input type="text" class="form-control" id="hairstyleInput"
-                                placeholder="Hairstyle: (e.g., Long hair)">
-                        </div>
-                        <div class="mb-3">
-                            <label for="skinColorInput" class="form-label visually-hidden">Skin Color:</label>
-                            <input type="text" class="form-control" id="skinColorInput"
-                                placeholder="Skin Color: (e.g., Pale, dark, bronze)">
+
+                        <input type="text" class="prompt_input" placeholder="Describe your desired images in words">
+
+                        <div class="control">
+                            <select class="style_select">
+                                <option value="realistic">Realistic</option>
+                                <option value="anime">Anime</option>
+                                <option value="cartoon">Cartoon</option>
+                                <option value="abstract">Abstract</option>
+                                <option value="photorealistic">Photorealistic</option>
+                            </select>
+                            <select class="img_quantity">
+                                <option value="1">1 Image</option>
+                                <option value="2">2 Images</option>
+                                <option value="3">3 Images</option>
+                                <option value="4" selected>4 Images</option>
+                            </select>
+                            <button type="submit" class="generate_btn">Generate</button>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="generateFromDetails"
-                        data-bs-dismiss="modal">Save</button>
+            </section>
+
+            <!-- Image Gallery with Dropdown -->
+            <section class="img_gallery">
+                <div class="model-results" id="model-results">
+                    <!-- Container mặc định hiển thị 4 ảnh ban đầu -->
+                    <div class="default-images" id="default-images">
+                        <div class="img_container" id="default-container"></div>
+                    </div>
+                    <!-- Các nhóm mô hình, ẩn ban đầu -->
+                    <div class="model-group" id="stable-diffusion-group" style="display: none;">
+                        <h3>Stable Diffusion 3.5</h3>
+                        <div class="img_container" id="stable-diffusion-container"></div>
+                    </div>
+                    <div class="model-group" id="flux1-group" style="display: none;">
+                        <h3>Flux1</h3>
+                        <div class="img_container" id="flux1-container"></div>
+                    </div>
+                    <div class="model-group" id="flux-midjourney-group" style="display: none;">
+                        <h3>Flux-Midjourney</h3>
+                        <div class="img_container" id="flux-midjourney-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Prompt Modal -->
+            <div class="modal fade" id="detailedPromptModal" tabindex="-1" aria-labelledby="detailedPromptModalLabel"
+                data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-modal="true" inert>
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detailedPromptModalLabel">Create Detailed Prompt</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="detailedPromptForm">
+                                <div class="mb-3">
+                                    <label for="backgroundInput" class="form-label visually-hidden">Background:</label>
+                                    <input type="text" class="form-control" id="backgroundInput"
+                                        placeholder="Background: (e.g., A majestic mountain range)">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="characterInput" class="form-label visually-hidden">Character:</label>
+                                    <input type="text" class="form-control" id="characterInput"
+                                        placeholder="Character: (e.g., A brave knight in shining armor)">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hairstyleInput" class="form-label visually-hidden">Hairstyle:</label>
+                                    <input type="text" class="form-control" id="hairstyleInput"
+                                        placeholder="Hairstyle: (e.g., Long hair)">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="skinColorInput" class="form-label visually-hidden">Skin Color:</label>
+                                    <input type="text" class="form-control" id="skinColorInput"
+                                        placeholder="Skin Color: (e.g., Pale, dark, bronze)">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="generateFromDetails"
+                                data-bs-dismiss="modal">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login/Register Modal -->
+            <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="loginRegisterModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="login-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="login-username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="login-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="login-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                                <button type="button" class="btn btn-secondary" id="show-register-form">Need an account?
+                                    Register</button>
+                            </form>
+                            <form id="register-form" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="register-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="register-username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="register-password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-email" class="form-label">Email (optional)</label>
+                                    <input type="email" class="form-control" id="register-email">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Register</button>
+                                <button type="button" class="btn btn-secondary" id="show-login-form">Already have an
+                                    account?
+                                    Login</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- Footer -->
+        <footer class="bg-light text-center py-3">
+            <div class="container">
+                <p class="text-muted">© 2025 AI Image Generator</p>
+                <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer"
+                    class="link-secondary">Hugging Face</a> |
+                <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại
+                    học Sài Gòn</a>
+            </div>
+        </footer>
     </div>
-
-    <!-- Login/Register Modal -->
-    <div class="modal fade" id="loginRegisterModal" tabindex="-1" aria-labelledby="loginRegisterModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loginRegisterModalLabel"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="login-form">
-                        <div class="mb-3">
-                            <label for="login-username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="login-username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="login-password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="login-password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Login</button>
-                        <button type="button" class="btn btn-secondary" id="show-register-form">Need an account?
-                            Register</button>
-                    </form>
-                    <form id="register-form" style="display: none;">
-                        <div class="mb-3">
-                            <label for="register-username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="register-username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="register-password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="register-password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="register-email" class="form-label">Email (optional)</label>
-                            <input type="email" class="form-control" id="register-email">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
-                        <button type="button" class="btn btn-secondary" id="show-login-form">Already have an account?
-                            Login</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-light text-center py-3">
-        <div class="container">
-            <p class="text-muted">© 2025 AI Image Generator</p>
-            <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging
-                Face</a> |
-            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại học
-                Sài Gòn</a>
-        </div>
-    </footer>
 </body>
 
 </html>

@@ -19,12 +19,12 @@
     } else {
         // Băm mật khẩu
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
+        $role = 'customer'; 
         // Thêm người dùng vào cơ sở dữ liệu
-        $sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $username, $hashed_password, $email);
-
+        mysqli_stmt_bind_param($stmt, "ssss", $username, $hashed_password, $email, $role);
+    
         if (mysqli_stmt_execute($stmt)) {
             echo json_encode(['success' => true, 'message' => 'Registration successful']);
         } else {
