@@ -231,7 +231,7 @@ const generateSingleImage = async (modelId, userPrompt, userStyle, apiToken) => 
 
 const generateAiImages = async (userPrompt, userStyle, userImgQuantity, selectedModels) => {
   try {
-    const HUGGINGFACE_API_TOKEN = "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";
+    const HUGGINGFACE_API_TOKEN = "";
     let errorMessages = [];
 
     Object.keys(generatedImages).forEach(model => generatedImages[model] = []);
