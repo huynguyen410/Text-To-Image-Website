@@ -1,300 +1,330 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 
 /* CSS Reset (optional) */
 *,
 *::before,
 *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
 
 /* Navbar Styles */
 .navbar {
-    background-color: #4949e7; 
-    color: #fff;
-    padding: 1rem 0;
+  background-color: #4949e7;
+  color: #fff;
+  padding: 1rem 0;
 }
 
 .navbar-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
 }
 
 .navbar-menu {
-    list-style: none;
-    display: flex;
-    align-items: center;
+  list-style: none;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-menu li {
-    margin-left: 1.5rem;
+  margin-left: 1.5rem;
 }
 
 .navbar-menu li a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 1rem;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
 }
 
 /* Form styles (optional - you can customize these) */
 #login-register-form {
-    background-color: #f9f9f9;
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
 }
 
 #login-register-form h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
 }
 
 #login-register-form input {
-    width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 #login-register-form button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 /* Existing styles remain unchanged */
 .image_generator {
-    height: auto;
-    display: flex;
-    position: relative;
-    align-items: center;
-    justify-content: center;
-    background: url("../images/bg.jpg");
-    background-size: cover;
-    background-position: center center;
-    padding: 2rem 0;
+  height: auto;
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  background: url("../images/bg.jpg");
+  background-size: cover;
+  background-position: center center;
+  padding: 2rem 0;
 }
 
 .image_generator::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.5;
-    background: #121212;
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  background: #121212;
 }
 
 .image_generator .content {
-    color: #fff;
-    padding: 0 15px;
-    max-width: 760px;
-    text-align: center;
-    position: relative;
+  color: #fff;
+  padding: 0 15px;
+  max-width: 760px;
+  text-align: center;
+  position: relative;
 }
 
 .image_generator h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
 .image_generator p {
-    font-size: 1.35rem;
-    margin-top: 10px;
+  font-size: 1.35rem;
+  margin-top: 10px;
 }
 
 .image_generator .generate_form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    margin: 45px 0 15px 0;
-    padding: 1rem;
-    background: #fff;
-    border-radius: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 45px 0 15px 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 10px;
 }
 
 /* Style select */
 .style_select {
-    outline: none;
-    border: none;
-    background: none;
-    font-size: 1rem;
+  outline: none;
+  border: none;
+  background: none;
+  font-size: 1rem;
 }
 
 .generate_form .prompt_input {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    outline: none;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 1rem;
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  outline: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 1rem;
 }
 
 .generate_form .control {
-    display: flex;
-    height: 100%;
-    gap: 15px;
-    justify-content: flex-end;
-    align-items: center;
+  display: flex;
+  height: 100%;
+  gap: 15px;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .generate_form .img_quantity,
 .generate_btn {
-    outline: none;
-    border: none;
-    background: none;
-    font-size: 1rem;
+  outline: none;
+  border: none;
+  background: none;
+  font-size: 1rem;
 }
 
 .generate_form .generate_btn {
-    background: #4949e7;
-    color: #fff;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    border-radius: 30px;
+  background: #4949e7;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  border-radius: 30px;
 }
 
+/* Dropdown định dạng ảnh */
+.format_select {
+  outline: none;
+  border: none;
+  background: none;
+  font-size: 1rem;
+}
+
+/* Image Gallery */
 .img_gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 0 15px;
-    max-width: 1250px;
-    margin: 50px auto;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 0 15px;
+  max-width: 1250px;
+  margin: 50px auto;
+  justify-content: center;
 }
 
 .img_gallery .img_card {
-    width: 275px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1/1;
-    border-radius: 5px;
-    overflow: hidden;
-    position: relative;
-    background: #f2f2f2;
+  width: 275px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1/1;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+  background: #f2f2f2;
 }
 
 .img_gallery .img_card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .img_gallery .img_card.loading img {
-    width: 80px;
-    height: 80px;
+  width: 80px;
+  height: 80px;
 }
 
+/* Nút Download */
 .img_gallery .img_card .download_btn {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    background: #fff;
-    height: 36px;
-    width: 36px;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: #fff;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
 .img_gallery .img_card:not(.loading):hover .download_btn {
-    display: flex;
+  display: flex;
 }
 
 .img_gallery .img_card .download_btn img {
-    width: 14px;
-    height: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* Nút Xóa nền (overlay button) */
+.bg-remove-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  z-index: 2;
+  display: none;
+}
+
+.img_card:hover .bg-remove-btn {
+  display: block;
 }
 
 /* Responsive Design */
 @media screen and (max-width:760px) {
-    .image_generator h1 {
-        font-size: 1.8rem;
-    }
+  .image_generator h1 {
+    font-size: 1.8rem;
+  }
 
-    .image_generator p {
-        font-size: 1rem;
-    }
+  .image_generator p {
+    font-size: 1rem;
+  }
 
-    .image_generator .generate_form {
-        margin-top: 30px;
-        padding: 1rem;
-    }
+  .image_generator .generate_form {
+    margin-top: 30px;
+    padding: 1rem;
+  }
 
-    .generate_form .control {
-        margin-top: 15px;
-        align-items: center;
-        justify-content: flex-end;
-    }
+  .generate_form .control {
+    margin-top: 15px;
+    align-items: center;
+    justify-content: flex-end;
+  }
 
-    .generate_form .img_quantity {
-        color: #000;
-    }
+  .generate_form .img_quantity {
+    color: #000;
+  }
 
-    .generate_form .img_quantity option {
-        color: #000;
-    }
+  .generate_form .img_quantity option {
+    color: #000;
+  }
 
-    .img_gallery {
-        margin-top: 20px;
-    }
+  .img_gallery {
+    margin-top: 20px;
+  }
 }
 
 @media screen and (max-width:550px) {
-    .img_gallery .img_card {
-        width: 100%;
-    }
+  .img_gallery .img_card {
+    width: 100%;
+  }
 
-    .generate_form .control {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .generate_form .control {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .generate_form .generate_btn {
-        width: 100%;
-        margin-top: 1rem;
-    }
+  .generate_form .generate_btn {
+    width: 100%;
+    margin-top: 1rem;
+  }
 }
 
 /* Model Selection Checkboxes */
 .model_selection {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    color: #000;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  color: #000;
 }
 
 .model_selection label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 body {
-    overflow: auto !important;
+  overflow: auto !important;
 }
 
 html, body {
@@ -311,70 +341,70 @@ html, body {
 
 /* Model Results Container */
 .model-results {
-    width: 100%;
-    max-width: 1250px;
-    margin: 0 auto;
-    padding: 0 15px;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 30px;
-    justify-content: center;
-    overflow-x: auto;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 0 15px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 30px;
+  justify-content: center;
+  overflow-x: auto;
 }
 
 .model-group {
-    flex: 1;
-    min-width: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .model-group h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: #333;
-    text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
 }
 
 /* Optional: Thêm màu sắc để phân biệt */
 #stable-diffusion-group {
-    border: 2px solid #4949e7;
-    padding: 15px;
-    border-radius: 10px;
+  border: 2px solid #4949e7;
+  padding: 15px;
+  border-radius: 10px;
 }
 
 #flux1-group {
-    border: 2px solid #e74c3c;
-    padding: 15px;
-    border-radius: 10px;
+  border: 2px solid #e74c3c;
+  padding: 15px;
+  border-radius: 10px;
 }
 
 #flux-midjourney-group {
-    border: 2px solid #2ecc71;
-    padding: 15px;
-    border-radius: 10px;
+  border: 2px solid #2ecc71;
+  padding: 15px;
+  border-radius: 10px;
 }
 
 /* Image Container trong mỗi nhóm */
 .img_container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
 }
 
 /* Default Images Container */
 .default-images {
-    width: 100%;
-    max-width: 1250px;
-    margin: 0 auto;
-    padding: 0 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 0 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
 }
 
 /* Toggle Password Button */
@@ -391,16 +421,16 @@ html, body {
 
 /* Responsive Design */
 @media screen and (max-width: 760px) {
-    .model-results {
-        flex-wrap: wrap;
-    }
-    .model-group {
-        min-width: 300px;
-    }
+  .model-results {
+    flex-wrap: wrap;
+  }
+  .model-group {
+    min-width: 300px;
+  }
 }
 
 @media screen and (max-width: 550px) {
-    .model-group {
-        min-width: 100%;
-    }
+  .model-group {
+    min-width: 100%;
+  }
 }
