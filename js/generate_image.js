@@ -1,11 +1,11 @@
 const generateForm = document.querySelector(".generate_form");
 const generateBtn = document.querySelector(".generate_btn");
 let isImageGenerating = false;
-const promptInput = document.querySelector(".prompt_input"); // Lấy prompt input
+const promptInput = document.querySelector(".prompt_input");
 const detailedPromptModal = document.getElementById('detailedPromptModal');
-const formatSelect = document.querySelector(".format_select"); // Dropdown định dạng ảnh
+const formatSelect = document.querySelector(".format_select");
 
-// Hiển thị/ẩn Detailed Prompt Form
+// Elements của Detailed Prompt Modal
 const showDetailedPromptFormBtn = document.getElementById('showDetailedPromptForm');
 const detailedPromptForm = document.getElementById('detailedPromptForm');
 const backgroundInput = document.getElementById('backgroundInput');
@@ -13,6 +13,12 @@ const characterInput = document.getElementById('characterInput');
 const hairstyleInput = document.getElementById('hairstyleInput');
 const skinColorInput = document.getElementById('skinColorInput');
 const generateFromDetailsBtn = document.getElementById('generateFromDetails');
+const premiumBtn = document.getElementById("premiumBtn");
+console.log("premiumBtn:", premiumBtn);
+premiumBtn.addEventListener("click", function() {
+  console.log("premiumBtn clicked");
+  // ...
+});
 
 // Store generated images by model
 let generatedImages = {
@@ -21,7 +27,6 @@ let generatedImages = {
   "strangerzonehf/Flux-Midjourney-Mix2-LoRA": []
 };
 
-// Lắng nghe sự thay đổi của dropdown định dạng ảnh
 formatSelect.addEventListener("change", handleFormatChange);
 
 function handleFormatChange(e) {
@@ -31,15 +36,12 @@ function handleFormatChange(e) {
 }
 
 function convertImageFormat(newFormat) {
-  // Lấy tất cả các thẻ ảnh trong gallery
   const imageCards = document.querySelectorAll(".img_card");
   imageCards.forEach(card => {
     const imgElement = card.querySelector("img");
-    // Nếu ảnh là ảnh mặc định (đường dẫn tương đối), cập nhật phần mở rộng file
     if (imgElement.src.includes("../images/")) {
       imgElement.src = imgElement.src.replace(/\.(jpg|jpeg|png|webp)$/i, `.${newFormat}`);
     }
-    // Cập nhật thuộc tính download của nút download
     const downloadBtn = card.querySelector(".download_btn");
     if (downloadBtn) {
       let fileName = downloadBtn.download;
@@ -55,9 +57,7 @@ function convertImageFormat(newFormat) {
 function showAlert(message, type) {
   const toastElement = document.getElementById("formatToast");
   if (toastElement) {
-    // Cập nhật nội dung thông báo
     toastElement.querySelector(".toast-body").innerText = message;
-    // Cập nhật lớp màu theo loại thông báo
     toastElement.classList.remove("text-bg-success", "text-bg-danger", "text-bg-warning");
     if (type === "success") {
       toastElement.classList.add("text-bg-success");
@@ -66,13 +66,47 @@ function showAlert(message, type) {
     } else {
       toastElement.classList.add("text-bg-warning");
     }
-    // Khởi tạo và hiển thị Toast với delay 3000ms
     const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
     toast.show();
   }
 }
 
-// Hiển thị 4 ảnh mặc định khi tải trang
+function updateUserQuota() {
+  return fetch("../js/update_image_quota.php", { method: "POST" })
+    .then(response => response.json())
+    .catch(error => {
+      showAlert("Không thể cập nhật lượt tạo ảnh. Vui lòng thử lại sau.", "danger");
+      return { success: false };
+    });
+}
+
+function getCurrentUserInfo() {
+  return fetch("../js/get_user_info.php")
+    .then(response => response.json())
+    .catch(error => {
+      showAlert("Không thể lấy thông tin người dùng.", "danger");
+      return { success: false };
+    });
+}
+
+function updateQuotaDisplay() {
+  const quotaItem = document.getElementById("quota-item");
+  const userQuotaSpan = document.getElementById("userQuota");
+  const premiumItem = document.getElementById("premium-item");
+
+  getCurrentUserInfo().then(userInfo => {
+    if (userInfo.success) {
+      quotaItem.style.display = "block";
+      userQuotaSpan.innerText = userInfo.image_quota;
+      premiumItem.style.display = "block";
+    } else {
+      quotaItem.style.display = "none";
+      premiumItem.style.display = "block";
+      userQuotaSpan.innerText = "0";
+    }
+  });
+}
+
 const showDefaultImages = () => {
   const defaultContainer = document.querySelector("#default-container");
   defaultContainer.innerHTML = "";
@@ -82,34 +116,27 @@ const showDefaultImages = () => {
     "../images/img-3.jpg",
     "../images/img-4.jpg"
   ];
-
   defaultImages.forEach((url, index) => {
     const imgCard = createImageCard(url, index);
     defaultContainer.appendChild(imgCard);
   });
 };
 
-// Cập nhật container dựa trên các mô hình được chọn
 const updateImageContainer = (selectedModels) => {
   const stableDiffusionGroup = document.querySelector("#stable-diffusion-group");
   const flux1Group = document.querySelector("#flux1-group");
   const fluxMidjourneyGroup = document.querySelector("#flux-midjourney-group");
   const defaultImages = document.querySelector("#default-images");
 
-  // Ẩn ảnh mặc định
   defaultImages.style.display = "none";
-
-  // Ẩn tất cả nhóm mô hình trước
   stableDiffusionGroup.style.display = "none";
   flux1Group.style.display = "none";
   fluxMidjourneyGroup.style.display = "none";
 
-  // Xóa nội dung cũ trong container
   document.querySelector("#stable-diffusion-container").innerHTML = "";
   document.querySelector("#flux1-container").innerHTML = "";
   document.querySelector("#flux-midjourney-container").innerHTML = "";
 
-  // Hiển thị chỉ các mô hình được chọn
   selectedModels.forEach(modelId => {
     if (modelId === "stabilityai/stable-diffusion-3.5-large") {
       stableDiffusionGroup.style.display = "flex";
@@ -133,7 +160,6 @@ const updateImageContainer = (selectedModels) => {
   });
 };
 
-// Hàm tạo img_card để tái sử dụng (bao gồm nút Download và nút Xóa nền)
 const createImageCard = (url, index) => {
   const imgCard = document.createElement("div");
   imgCard.classList.add("img_card");
@@ -147,7 +173,6 @@ const createImageCard = (url, index) => {
   downloadBtn.download = `${new Date().getTime()}_${index}.jpg`;
   downloadBtn.innerHTML = `<img src="../images/download.svg" alt="download icon">`;
 
-  // Tạo nút Xóa nền (overlay button)
   const bgRemoveBtn = document.createElement("button");
   bgRemoveBtn.classList.add("bg-remove-btn");
   bgRemoveBtn.innerText = "Xóa nền";
@@ -162,30 +187,24 @@ const createImageCard = (url, index) => {
   return imgCard;
 };
 
-// Hàm gọi API xóa nền sử dụng API cục bộ (Flask) với rembg
 async function removeBackground(imgElement, btn) {
   btn.disabled = true;
   const originalText = btn.innerText;
   btn.innerText = "Đang xóa nền...";
   try {
-    // Lấy blob của ảnh hiện tại
     const responseImage = await fetch(imgElement.src);
     const imageBlob = await responseImage.blob();
-
-    // Tạo FormData và thêm file ảnh
     const formData = new FormData();
     formData.append('image', imageBlob, 'input.png');
 
-    // Gọi API background removal cục bộ
     const response = await fetch('http://localhost:5000/remove-background', {
       method: "POST",
       body: formData
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Background removal error:", errorText);
-      throw new Error("Background removal failed");
+      console.error("Lỗi xóa nền");
+      throw new Error("Xóa nền thất bại");
     }
     const resultBlob = await response.blob();
     const newUrl = URL.createObjectURL(resultBlob);
@@ -216,12 +235,9 @@ const generateSingleImage = async (modelId, userPrompt, userStyle, apiToken) => 
         },
       }),
     });
-
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Failed to generate image with ${modelId}: ${errorData.error || 'Unknown error'}`);
+      throw new Error(`Không thể tạo ảnh cho model ${modelId}`);
     }
-
     return await response.blob();
   } catch (error) {
     console.error(error.message);
@@ -233,18 +249,15 @@ const generateAiImages = async (userPrompt, userStyle, userImgQuantity, selected
   try {
     const HUGGINGFACE_API_TOKEN = "";
     let errorMessages = [];
-
     Object.keys(generatedImages).forEach(model => generatedImages[model] = []);
 
     for (const MODEL_ID of selectedModels) {
       const imgDataArray = [];
       console.log(`Generating ${userImgQuantity} images for ${MODEL_ID}...`);
-
       for (let i = 0; i < userImgQuantity; i++) {
         let blob = null;
         let retries = 0;
         const maxRetries = 3;
-
         while (blob === null && retries < maxRetries) {
           blob = await generateSingleImage(MODEL_ID, userPrompt, userStyle, HUGGINGFACE_API_TOKEN);
           if (blob === null) {
@@ -253,31 +266,26 @@ const generateAiImages = async (userPrompt, userStyle, userImgQuantity, selected
             await new Promise(resolve => setTimeout(resolve, 2000));
           }
         }
-
         if (blob) {
           const b64_json = await blobToBase64(blob);
           const url = URL.createObjectURL(blob);
           imgDataArray.push({ url });
           saveImageToHistory(userPrompt, userStyle, b64_json, blob.size, MODEL_ID);
         } else {
-          console.error(`Failed to generate image ${i + 1} for ${MODEL_ID} after ${maxRetries} retries`);
-          errorMessages.push(`Model ${MODEL_ID} failed to generate image ${i + 1}`);
+          console.error(`Không thể tạo ảnh cho model ${MODEL_ID}`);
+          errorMessages.push(`Model ${MODEL_ID} không thể tạo ảnh`);
         }
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
-
       generatedImages[MODEL_ID] = imgDataArray;
-      console.log(`${MODEL_ID} generated ${imgDataArray.length} images out of ${userImgQuantity}`);
+      console.log(`${MODEL_ID} generated ${imgDataArray.length} images`);
     }
-
     updateImageContainer(selectedModels);
-
     if (errorMessages.length > 0) {
-      alert(`Some images failed to generate:\n${errorMessages.join('\n')}`);
+      showAlert(`Một số ảnh không được tạo: ${errorMessages.join('; ')}`, "danger");
     }
-
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showAlert("Có lỗi xảy ra khi tạo ảnh. Vui lòng thử lại sau.", "danger");
   } finally {
     generateBtn.removeAttribute("disabled");
     generateBtn.innerText = "Generate";
@@ -299,70 +307,67 @@ const blobToBase64 = (blob) => {
         fileReader.readAsDataURL(event.data);
       };
     `], { type: 'text/javascript' })));
-
     worker.onmessage = function (event) {
       const base64String = event.data;
       resolve(base64String);
       worker.terminate();
     };
-
     worker.onerror = function (error) {
       reject(error);
       worker.terminate();
     };
-
     worker.postMessage(blob);
   });
 };
 
 const handleImageGeneration = (e) => {
   e.preventDefault();
-
-  getUserInfo().then(userInfo => {
+  getCurrentUserInfo().then(userInfo => {
     if (!userInfo.success) {
-      alert("You must be logged in to generate images.");
+      showAlert("Bạn phải đăng nhập để tạo ảnh.", "danger");
       return;
     }
-
-    if (isImageGenerating) return;
-
-    // Lấy prompt từ input field
-    let userPrompt = promptInput.value;
-
-    const userStyle = document.querySelector(".style_select").value;
-    const userImgQuantity = parseInt(document.querySelector(".img_quantity").value);
-    const selectedModels = Array.from(document.querySelectorAll('input[name="model"]:checked')).map(cb => cb.value);
-
-    if (selectedModels.length === 0) {
-      alert("Please select at least one model.");
+    if (userInfo.image_quota <= 0) {
+      showAlert("Hết lượt tạo ảnh", "danger");
       return;
     }
-
-    generateBtn.setAttribute("disabled", true);
-    generateBtn.innerText = "Generating";
-    isImageGenerating = true;
-
-    // Ẩn ảnh mặc định ngay lập tức
-    document.querySelector("#default-images").style.display = "none";
-
-    // Hiển thị loading cho các mô hình được chọn
-    selectedModels.forEach(modelId => {
-      if (modelId === "stabilityai/stable-diffusion-3.5-large") {
-        const group = document.querySelector("#stable-diffusion-group");
-        group.style.display = "flex";
-        document.querySelector("#stable-diffusion-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
-      } else if (modelId === "black-forest-labs/FLUX.1-dev") {
-        const group = document.querySelector("#flux1-group");
-        group.style.display = "flex";
-        document.querySelector("#flux1-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
-      } else if (modelId === "strangerzonehf/Flux-Midjourney-Mix2-LoRA") {
-        const group = document.querySelector("#flux-midjourney-group");
-        group.style.display = "flex";
-        document.querySelector("#flux-midjourney-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+    updateUserQuota().then(result => {
+      if (!result.success) {
+        showAlert("Không thể cập nhật lượt tạo ảnh. Vui lòng thử lại sau.", "danger");
+        generateBtn.removeAttribute("disabled");
+        generateBtn.innerText = "Generate";
+        return;
       }
+      updateQuotaDisplay();
+      const userPrompt = promptInput.value;
+      const userStyle = document.querySelector(".style_select").value;
+      const userImgQuantity = parseInt(document.querySelector(".img_quantity").value);
+      const selectedModels = Array.from(document.querySelectorAll('input[name="model"]:checked')).map(cb => cb.value);
+      if (selectedModels.length === 0) {
+        showAlert("Vui lòng chọn ít nhất 1 mô hình.", "warning");
+        return;
+      }
+      generateBtn.setAttribute("disabled", true);
+      generateBtn.innerText = "Generating";
+      isImageGenerating = true;
+      document.querySelector("#default-images").style.display = "none";
+      selectedModels.forEach(modelId => {
+        if (modelId === "stabilityai/stable-diffusion-3.5-large") {
+          const group = document.querySelector("#stable-diffusion-group");
+          group.style.display = "flex";
+          document.querySelector("#stable-diffusion-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+        } else if (modelId === "black-forest-labs/FLUX.1-dev") {
+          const group = document.querySelector("#flux1-group");
+          group.style.display = "flex";
+          document.querySelector("#flux1-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+        } else if (modelId === "strangerzonehf/Flux-Midjourney-Mix2-LoRA") {
+          const group = document.querySelector("#flux-midjourney-group");
+          group.style.display = "flex";
+          document.querySelector("#flux-midjourney-container").innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
+        }
+      });
+      generateAiImages(userPrompt, userStyle, userImgQuantity, selectedModels);
     });
-
-    generateAiImages(userPrompt, userStyle, userImgQuantity, selectedModels);
   });
 };
 
@@ -376,23 +381,20 @@ const saveImageToHistory = async (prompt, style, image_data, blobSize, modelId) 
     formData.append('image_data', image_data);
     formData.append('blob_size', blobSize);
     formData.append('model_id', modelId);
-
     const response = await fetch("save_image_history.php", {
       method: "POST",
       body: formData,
     });
-
     const data = await response.json();
     if (!data.success) {
-      console.error("Failed to save image to history:", data.message);
+      console.error("Lưu lịch sử ảnh thất bại");
     }
   } catch (error) {
-    console.error("Error saving image to history:", error);
+    console.error("Error saving image history:", error);
   }
 };
 
 let modalInstance;
-// Hiển thị/ẩn Detailed Prompt Form
 showDetailedPromptFormBtn.addEventListener('click', () => {
   const modalElement = document.getElementById('detailedPromptModal');
   modalElement.inert = false;
@@ -426,5 +428,40 @@ generateFromDetailsBtn.addEventListener('click', () => {
   promptInput.value = detailedPrompt;
 });
 
-// Gọi hàm hiển thị ảnh mặc định khi tải trang
-document.addEventListener("DOMContentLoaded", showDefaultImages);
+
+
+// Xác nhận thanh toán Premium (Demo)
+document.getElementById("confirmPremiumBtn").addEventListener("click", function() {
+  fetch("../js/update_premium.php", { method: "POST" })
+    .then(response => response.json())
+    .then(result => {
+      if(result.success){
+         showAlert("Thanh toán thành công. Bạn đã đăng ký Premium!", "success");
+         updateQuotaDisplay();
+         // Reload trang để cập nhật trạng thái Premium
+         window.location.reload();
+      } else {
+         showAlert("Thanh toán thất bại. Vui lòng thử lại sau.", "danger");
+      }
+    })
+    .catch(error => {
+      showAlert("Có lỗi xảy ra. Vui lòng thử lại sau.", "danger");
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  showDefaultImages();
+  updateQuotaDisplay();
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const premiumBtn = document.getElementById("premiumBtn");
+  console.log("premiumBtn:", premiumBtn);
+  if (premiumBtn) {
+    premiumBtn.addEventListener("click", function() {
+      console.log("premiumBtn clicked");
+      // Các xử lý khác...
+    });
+  } else {
+    console.error("Không tìm thấy phần tử có id 'premiumBtn'");
+  }
+});
