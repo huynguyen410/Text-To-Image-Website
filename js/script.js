@@ -16,14 +16,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const showLoginForm = () => {
         loginForm.style.display = 'block';
         registerForm.style.display = 'none';
-        document.getElementById('loginRegisterModalLabel').textContent = "Login"; // Cập nhật tiêu đề modal
+        document.getElementById('loginRegisterModalLabel').textContent = "Login";
     };
 
     // Hàm hiển thị form đăng ký
     const showRegisterForm = () => {
         registerForm.style.display = 'block';
         loginForm.style.display = 'none';
-        document.getElementById('loginRegisterModalLabel').textContent = "Register"; // Cập nhật tiêu đề modal
+        document.getElementById('loginRegisterModalLabel').textContent = "Register";
     };
 
     // Hàm ẩn modal
@@ -48,20 +48,16 @@ document.addEventListener('DOMContentLoaded', function () {
         usernameDisplay.textContent = '';
     };
 
-    // Xử lý sự kiện click trên nút "Logout"
     if (logoutButton) {
         logoutButton.addEventListener('click', (e) => {
-            e.preventDefault(); // Ngăn chặn chuyển hướng trang
-            // Thêm code để gọi API đăng xuất ở đây
+            e.preventDefault();
             logoutUser()
                 .then(data => {
                     if (data.success) {
                         hideLogout();
-                        localStorage.removeItem('username'); // Xóa khỏi Local Storage
-                        checkLoginStatus(); // Cập nhật giao diện
+                        localStorage.removeItem('username');
                         alert('Logout successfully');
-                        window.location.href = 'index.html';// Chuyển hướng đến trang chủ
-                        
+                        window.location.href = 'index.html';
                     } else {
                         alert('Logout failed: ' + data.message);
                     }
@@ -69,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Hàm kiểm tra trạng thái đăng nhập (ví dụ)
     const checkLoginStatus = async () => {
         const username = localStorage.getItem('username');
         if (username) {
@@ -79,20 +74,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Gọi hàm kiểm tra trạng thái đăng nhập khi trang được tải
     checkLoginStatus();
 
-    // Thêm code để xử lý submit form đăng ký
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Ngăn chặn submit mặc định
-
+            e.preventDefault();
             const username = document.getElementById('register-username').value;
             const password = document.getElementById('register-password').value;
             const email = document.getElementById('register-email').value;
-
             const data = await registerUser(username, password, email);
-
             if (data.success) {
                 alert('Registration successful');
                 hideLoginRegisterModal();
@@ -103,29 +93,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Thêm code để xử lý submit form đăng nhập
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Ngăn chặn submit mặc định
-
+            e.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
-
             const data = await loginUser(username, password);
-
             if (data.success) {
                 alert('Login successful');
                 hideLoginRegisterModal();
-                // Lưu thông tin đăng nhập vào Local Storage
                 localStorage.setItem('username', username);
-                checkLoginStatus();
-
+                // Reload trang sau khi đăng nhập thành công
+                window.location.reload();
             } else {
                 alert('Login failed: ' + data.message);
             }
         });
     }
-    // Xử lý sự kiện click trên nút "Show Login Form"
+
     if (showLoginFormButton) {
         showLoginFormButton.addEventListener('click', (e) => {
             e.preventDefault();
@@ -133,127 +118,70 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Xử lý sự kiện click trên nút "Show Register Form"
     if (showRegisterFormButton) {
         showRegisterFormButton.addEventListener('click', (e) => {
             e.preventDefault();
             showRegisterForm();
         });
     }
-    // Hiển thị form đăng nhập khi modal được hiển thị
+
     if (loginRegisterModal) {
         loginRegisterModal.addEventListener('show.bs.modal', () => {
             showLoginForm();
         });
     }
 
-    // Xử lý sự kiện click trên liên kết "History"
     historyLink.addEventListener('click', (e) => {
-        e.preventDefault(); // Ngăn chặn chuyển hướng trang
-
-        // Kiểm tra trạng thái đăng nhập
+        e.preventDefault();
         getUserInfo().then(userInfo => {
             if (!userInfo.success) {
                 alert("You must be logged in to view history.");
-                return; // Không chuyển hướng nếu chưa đăng nhập
+                return;
             }
-
-            // Chuyển hướng đến trang lịch sử
             window.location.href = 'image_history.php';
         });
     });
 
-    // Khởi tạo Tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl =>  {
-    const tooltip = new bootstrap.Tooltip(tooltipTriggerEl);
-       tooltipTriggerEl.addEventListener('mouseleave', function () {
-        tooltip.hide();
-    })
-});
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+        const tooltip = new bootstrap.Tooltip(tooltipTriggerEl);
+        tooltipTriggerEl.addEventListener('mouseleave', function () {
+            tooltip.hide();
+        });
+    });
 });
 
-// Các hàm gọi API ()
 const registerUser = async (username, password, email) => {
     const formData = new URLSearchParams();
     formData.append('username', username);
     formData.append('password', password);
-    formData.append('email', email); // Gửi email (nếu có)
-
+    formData.append('email', email);
     const response = await fetch('register.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
     });
-    const data = await response.json();
-    return data;
+    return await response.json();
 };
 
 const loginUser = async (username, password) => {
     const formData = new URLSearchParams();
     formData.append('username', username);
     formData.append('password', password);
-
     const response = await fetch('login.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
     });
-    const data = await response.json();
-    return data;
+    return await response.json();
 };
 
 const logoutUser = async () => {
     const response = await fetch('logout.php');
-    const data = await response.json();
-    return data;
+    return await response.json();
 };
 
 const getUserInfo = async () => {
     const response = await fetch('get_user_info.php');
-    const data = await response.json();
-    return data;
-};
-
-//Load lịch sử tạo ảnh
-const loadHistory = async () => {
-    try {
-        const response = await fetch("get_image_history.php");
-        const data = await response.json();
-
-        if (data.success) {
-            const history = data.history;
-            let historyHTML = "";
-
-            if (history.length > 0) { // Kiểm tra xem có ảnh trong lịch sử hay không
-                history.forEach(item => {
-                    historyHTML += `
-                        <div class="col-md-3 mb-3">
-                            <div class="card">
-                                <img src="${item.image_url}" class="card-img-top" alt="Image">
-                                <div class="card-body">
-                                    <h5 class="card-title">Prompt: ${item.prompt}</h5>
-                                    <p class="card-text">Style: ${item.style}</p>
-                                    <p class="card-text">Model: ${item.model}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                historyHTML = "<p>No images generated yet.</p>"; // Hiển thị thông báo nếu không có ảnh
-            }
-
-            document.getElementById("image-history-container").innerHTML = historyHTML;
-        } else {
-            alert("Failed to load image history: " + data.message);
-        }
-    } catch (error) {
-        console.error("Error loading image history:", error);
-        alert("Error loading image history.");
-    }
+    return await response.json();
 };
