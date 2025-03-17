@@ -72,7 +72,8 @@ function showAlert(message, type) {
 }
 
 function updateUserQuota() {
-  return fetch("../js/update_image_quota.php", { method: "POST" })
+  // Sửa đường dẫn thành file update_image_quota.php nằm trong src
+  return fetch("update_image_quota.php", { method: "POST" })
     .then(response => response.json())
     .catch(error => {
       showAlert("Không thể cập nhật lượt tạo ảnh. Vui lòng thử lại sau.", "danger");
@@ -81,7 +82,8 @@ function updateUserQuota() {
 }
 
 function getCurrentUserInfo() {
-  return fetch("../js/get_user_info.php")
+  // Sửa đường dẫn thành file get_user_info.php nằm trong src
+  return fetch("get_user_info.php")
     .then(response => response.json())
     .catch(error => {
       showAlert("Không thể lấy thông tin người dùng.", "danger");
@@ -97,7 +99,7 @@ function updateQuotaDisplay() {
   getCurrentUserInfo().then(userInfo => {
     if (userInfo.success) {
       quotaItem.style.display = "block";
-      userQuotaSpan.innerText = userInfo.image_quota;
+      userQuotaSpan.innerText = userInfo.user.image_quota;
       premiumItem.style.display = "block";
     } else {
       quotaItem.style.display = "none";
@@ -327,7 +329,7 @@ const handleImageGeneration = (e) => {
       showAlert("Bạn phải đăng nhập để tạo ảnh.", "danger");
       return;
     }
-    if (userInfo.image_quota <= 0) {
+    if (userInfo.user.image_quota <= 0) {
       showAlert("Hết lượt tạo ảnh", "danger");
       return;
     }
@@ -381,6 +383,7 @@ const saveImageToHistory = async (prompt, style, image_data, blobSize, modelId) 
     formData.append('image_data', image_data);
     formData.append('blob_size', blobSize);
     formData.append('model_id', modelId);
+    // Giả sử file save_image_history.php nằm trong project/src (cùng với index.html)
     const response = await fetch("save_image_history.php", {
       method: "POST",
       body: formData,
@@ -428,40 +431,8 @@ generateFromDetailsBtn.addEventListener('click', () => {
   promptInput.value = detailedPrompt;
 });
 
-
-
-// Xác nhận thanh toán Premium (Demo)
-document.getElementById("confirmPremiumBtn").addEventListener("click", function() {
-  fetch("../js/update_premium.php", { method: "POST" })
-    .then(response => response.json())
-    .then(result => {
-      if(result.success){
-         showAlert("Thanh toán thành công. Bạn đã đăng ký Premium!", "success");
-         updateQuotaDisplay();
-         // Reload trang để cập nhật trạng thái Premium
-         window.location.reload();
-      } else {
-         showAlert("Thanh toán thất bại. Vui lòng thử lại sau.", "danger");
-      }
-    })
-    .catch(error => {
-      showAlert("Có lỗi xảy ra. Vui lòng thử lại sau.", "danger");
-    });
-});
-
+// Đảm bảo các event listener khác (như confirmPremiumBtn) không gây xung đột
 document.addEventListener("DOMContentLoaded", () => {
   showDefaultImages();
   updateQuotaDisplay();
-});
-document.addEventListener('DOMContentLoaded', () => {
-  const premiumBtn = document.getElementById("premiumBtn");
-  console.log("premiumBtn:", premiumBtn);
-  if (premiumBtn) {
-    premiumBtn.addEventListener("click", function() {
-      console.log("premiumBtn clicked");
-      // Các xử lý khác...
-    });
-  } else {
-    console.error("Không tìm thấy phần tử có id 'premiumBtn'");
-  }
 });
