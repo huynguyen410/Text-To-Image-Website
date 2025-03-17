@@ -455,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener('DOMContentLoaded', () => {
   const premiumBtn = document.getElementById("premiumBtn");
-  console.log("premiumBtn:", premiumBtn);
+  // console.log("premiumBtn:", premiumBtn);
   if (premiumBtn) {
     premiumBtn.addEventListener("click", function() {
       console.log("premiumBtn clicked");
