@@ -1,22 +1,23 @@
 <?php
-    session_start();
+session_start();
 
-    // Đặt thời gian timeout cho session (ví dụ: 30 phút)
-    $timeout = 1800; // 30 phút (30 * 60 giây)
+$timeout = 1800; // 30 phút
 
-    // Kiểm tra xem session đã được tạo hay chưa
-    if (isset($_SESSION['last_activity'])) {
-        // Tính thời gian kể từ lần hoạt động cuối cùng
-        $session_life = time() - $_SESSION['last_activity'];
-
-        // Nếu session đã hết hạn, hủy session
-        if ($session_life > $timeout) {
-            session_destroy();
-            header("Location: ../src/index.php"); // Chuyển hướng đến trang đăng nhập
+if (isset($_SESSION['last_activity'])) {
+    $session_life = time() - $_SESSION['last_activity'];
+    if ($session_life > $timeout) {
+        session_destroy();
+        if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+            ob_clean();
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Session timed out']);
+            exit;
+        } else {
+            header("Location: ../src/index.php");
             exit;
         }
     }
-
-    // Cập nhật thời gian hoạt động cuối cùng
-    $_SESSION['last_activity'] = time();
+}
+$_SESSION['last_activity'] = time();
 ?>

@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     historyLink.addEventListener('click', (e) => {
         e.preventDefault();
+        // get_user_info.php hiện nằm trong js/, từ index.html cần dùng đường dẫn ../js/get_user_info.php
         getUserInfo().then(userInfo => {
             if (!userInfo.success) {
                 alert("You must be logged in to view history.");
@@ -156,6 +157,7 @@ const registerUser = async (username, password, email) => {
     formData.append('username', username);
     formData.append('password', password);
     formData.append('email', email);
+    // Giả sử register.php nằm trong project/src
     const response = await fetch('register.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -168,6 +170,7 @@ const loginUser = async (username, password) => {
     const formData = new URLSearchParams();
     formData.append('username', username);
     formData.append('password', password);
+    // Giả sử login.php nằm trong src
     const response = await fetch('login.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -177,11 +180,13 @@ const loginUser = async (username, password) => {
 };
 
 const logoutUser = async () => {
+    // Giả sử logout.php nằm trong src
     const response = await fetch('logout.php');
     return await response.json();
 };
 
 const getUserInfo = async () => {
-    const response = await fetch('get_user_info.php');
+    // Vì get_user_info.php nằm trong project/js, từ index.html cần dùng đường dẫn: ../js/get_user_info.php
+    const response = await fetch("../js/get_user_info.php");
     return await response.json();
 };
