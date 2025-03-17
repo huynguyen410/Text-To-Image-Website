@@ -15,7 +15,7 @@
   <!-- Custom Scripts -->
   <script src="../js/script.js" defer></script>
   <script src="../js/generate_image.js" defer></script>
-  <!-- Thêm file xử lý premium riêng (premium.js) -->
+  <!-- Premium script đã chuyển vào project/js/ -->
   <script src="../js/premium.js" defer></script>
 </head>
 <body>
@@ -24,16 +24,17 @@
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="../src/index.html">AI Image Generator</a>
+          <!-- Vì index.html nằm trong src, link đến chính nó chỉ cần 'index.html' -->
+          <a class="navbar-brand" href="index.html">AI Image Generator</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                   aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-              <!-- Nút Đăng ký Premium luôn hiển thị (demo) -->
+              <!-- Nút Đăng ký Premium -->
               <li class="nav-item" id="premium-item">
-                <button class="btn btn-warning" id="premiumBtn">Đăng ký Premium</button>
+                <button type="button" class="btn btn-warning" id="premiumBtn">Đăng ký Premium</button>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="image_history.php" id="history-link">History</a>
@@ -66,20 +67,30 @@
               <h5 class="modal-title" id="premiumModalLabel">Thanh toán Premium</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center">
-              <!-- Bố cục demo: bảng chứa ảnh QR và nút "Đã chuyển khoản" -->
-              <table class="table table-bordered">
-                <tr>
-                  <td class="text-center">
-                    <img src="../images/qr_demo.png" alt="QR Code" class="img-fluid" style="max-width: 200px;">
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-center">
-                    Giá: 499.000 VNĐ
-                  </td>
-                </tr>
-              </table>
+            <div class="modal-body">
+              <!-- Phần chọn gói Premium -->
+              <h6 class="mb-3">Chọn gói Premium của bạn</h6>
+              <div class="btn-group d-flex" role="group" aria-label="Premium Packages">
+                <input type="radio" class="btn-check" name="package" id="package1" autocomplete="off" value="1" checked>
+                <label class="btn btn-outline-primary flex-fill" for="package1">1 Tháng</label>
+
+                <input type="radio" class="btn-check" name="package" id="package3" autocomplete="off" value="3">
+                <label class="btn btn-outline-primary flex-fill" for="package3">3 Tháng</label>
+
+                <input type="radio" class="btn-check" name="package" id="package6" autocomplete="off" value="6">
+                <label class="btn btn-outline-primary flex-fill" for="package6">6 Tháng</label>
+
+                <input type="radio" class="btn-check" name="package" id="package12" autocomplete="off" value="12">
+                <label class="btn btn-outline-primary flex-fill" for="package12">1 Năm</label>
+              </div>
+              <!-- Nút hiển thị thông tin thanh toán -->
+              <div class="mt-4">
+                <button id="showPaymentInfoBtn" class="btn btn-info">Xem thông tin thanh toán</button>
+              </div>
+              <!-- Phần hiển thị thông tin thanh toán (ẩn mặc định) -->
+              <div id="paymentInfo" class="mt-3" style="display: none;">
+                <!-- Nội dung thanh toán sẽ được cập nhật bởi JavaScript -->
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-success" id="confirmPremiumBtn">Đã chuyển khoản</button>
@@ -87,6 +98,7 @@
           </div>
         </div>
       </div>
+
 
       <!-- Toast Notification Container -->
       <div class="toast-container position-fixed top-0 end-0 p-3">
