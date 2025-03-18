@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         hideLogout();
                         localStorage.removeItem('username');
                         alert('Logout successfully');
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.php';
                     } else {
                         alert('Logout failed: ' + data.message);
                     }
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     historyLink.addEventListener('click', (e) => {
         e.preventDefault();
-        // get_user_info.php hiện nằm trong js/, từ index.html cần dùng đường dẫn ../js/get_user_info.php
+        // get_user_info.php hiện nằm trong js/, từ index.php cần dùng đường dẫn ../js/get_user_info.php
         getUserInfo().then(userInfo => {
             if (!userInfo.success) {
                 alert("You must be logged in to view history.");
@@ -171,7 +171,7 @@ const loginUser = async (username, password) => {
     formData.append('username', username);
     formData.append('password', password);
     // Giả sử login.php nằm trong src
-    const response = await fetch('login.php', {
+    const response = await fetch('../src/login.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,
@@ -181,12 +181,46 @@ const loginUser = async (username, password) => {
 
 const logoutUser = async () => {
     // Giả sử logout.php nằm trong src
-    const response = await fetch('logout.php');
+    const response = await fetch('../src/logout.php');
     return await response.json();
 };
 
 const getUserInfo = async () => {
-    // Vì get_user_info.php nằm trong project/js, từ index.html cần dùng đường dẫn: ../js/get_user_info.php
-    const response = await fetch("../js/get_user_info.php");
+    // Vì get_user_info.php nằm trong project/js, từ index.php cần dùng đường dẫn: ../js/get_user_info.php
+    const response = await fetch("../src/get_user_info.php");
     return await response.json();
 };
+
+const loadHistory = async () => {
+    try {
+        const response = await fetch("get_image_history.php");
+        const data = await response.json();
+
+        if (data.success) {
+            const history = data.history;
+            let historyHTML = "";
+
+            history.forEach(item => {
+                historyHTML += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <img src="${item.image_url}" class="card-img-top" alt="Image">
+                            <div class="card-body">
+                                <h5 class="card-title">Prompt: ${item.prompt}</h5>
+                                <p class="card-text">Style: ${item.style}</p>
+                                <p class="card-text">Model: ${item.model}</p> 
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById("image-history-container").innerHTML = historyHTML;
+        } else {
+            alert("Failed to load image history: " + data.message);
+        }
+    } catch (error) {
+        console.error("Error loading image history:", error);
+        alert("Error loading image history.");
+    }
+}

@@ -1,3 +1,17 @@
+<?php
+  include 'time_out.php'; // timeout session
+  require_once 'db_connect.php';
+
+  $sql = "SELECT id, model_id, name, description FROM models WHERE status = 'active'";
+  $result = mysqli_query($conn, $sql);
+
+  $models = array();
+  while ($row = mysqli_fetch_assoc($result)) {
+    $models[] = $row;
+  }
+
+  mysqli_close($conn);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,8 +38,8 @@
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-          <!-- Vì index.html nằm trong src, link đến chính nó chỉ cần 'index.html' -->
-          <a class="navbar-brand" href="index.html">AI Image Generator</a>
+          <!-- Vì index.php nằm trong src, link đến chính nó chỉ cần 'index.php' -->
+          <a class="navbar-brand" href="index.php">AI Image Generator</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                   aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -127,19 +141,14 @@
             </div>
             <!-- Model Selection Checkboxes -->
             <div class="model_selection" style="margin-bottom: 1rem;">
-              <label data-bs-toggle="tooltip" data-bs-placement="top" title="General purpose, high quality image generation.">
-                <input type="checkbox" name="model" value="stabilityai/stable-diffusion-3.5-large" checked>
-                Stable Diffusion 3.5
-              </label>
-              <label data-bs-toggle="tooltip" data-bs-placement="top" title="A model specializing in abstract and surreal imagery.">
-                <input type="checkbox" name="model" value="black-forest-labs/FLUX.1-dev"> Flux1
-              </label>
-              <label data-bs-toggle="tooltip" data-bs-placement="top" title="Combines the aesthetics of Flux with Midjourney's style.">
-                <input type="checkbox" name="model" value="strangerzonehf/Flux-Midjourney-Mix2-LoRA">
-                Flux-Midjourney
-              </label>
+              <?php foreach ($models as $model): ?>
+                <label data-bs-toggle="tooltip" data-bs-placement="top" title="<?php echo htmlspecialchars($model['description']); ?>">
+                  <input type="checkbox" name="model[]" value="<?php echo htmlspecialchars($model['model_id']); ?>">
+                  <?php echo htmlspecialchars($model['name']); ?>
+                </label>
+              <?php endforeach; ?>
             </div>
-            <input type="text" class="prompt_input" placeholder="Describe your desired images in words">
+            <input type="text" class="prompt_input" placeholder="Describe your desired images in words" required>
             <div class="control">
               <select class="style_select">
                 <option value="realistic">Realistic</option>
@@ -168,21 +177,31 @@
       <!-- Image Gallery -->
       <section class="img_gallery">
         <div class="model-results" id="model-results">
+          <!-- Container mặc định -->
           <div class="default-images" id="default-images">
             <div class="img_container" id="default-container"></div>
           </div>
-          <div class="model-group" id="stable-diffusion-group" style="display: none;">
-            <h3>Stable Diffusion 3.5</h3>
-            <div class="img_container" id="stable-diffusion-container"></div>
-          </div>
-          <div class="model-group" id="flux1-group" style="display: none;">
-            <h3>Flux1</h3>
-            <div class="img_container" id="flux1-container"></div>
-          </div>
-          <div class="model-group" id="flux-midjourney-group" style="display: none;">
-            <h3>Flux-Midjourney</h3>
-            <div class="img_container" id="flux-midjourney-container"></div>
-          </div>
+          <?php
+          if (!empty($models)) {
+            foreach ($models as $model) {
+              $model_id = $model['model_id']; // Dùng cho checkbox và API
+              $model_name = $model['name']; // Dùng cho tiêu đề và ID
+              $group_id = str_replace(' ', '-', strtolower($model_name)); // Chuyển tên thành ID hợp lệ (ví dụ: "Stable Diffusion 3.5" -> "stable-diffusion-3.5")
+              ?>
+              <div class="model-group" id="<?php echo htmlspecialchars($group_id); ?>-group" style="display: none;">
+                <h3><?php echo htmlspecialchars($model_name); ?></h3>
+                <div class="img_container" id="<?php echo htmlspecialchars($group_id); ?>-container"></div>
+              </div>
+              <?php
+            }
+          } else {
+            ?>
+            <div class="default-images" id="default-images">
+              <div class="img_container" id="default-container"></div>
+            </div>
+            <?php
+          }
+          ?>
         </div>
       </section>
 

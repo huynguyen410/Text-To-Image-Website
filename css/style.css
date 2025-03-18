@@ -355,6 +355,9 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: 2px solid #4949e7;
+  padding: 15px;
+  border-radius: 10px;
 }
 
 .model-group h3 {
@@ -363,25 +366,6 @@ html, body {
   margin-bottom: 15px;
   color: #333;
   text-align: center;
-}
-
-/* Phân biệt nhóm */
-#stable-diffusion-group {
-  border: 2px solid #4949e7;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-#flux1-group {
-  border: 2px solid #e74c3c;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-#flux-midjourney-group {
-  border: 2px solid #2ecc71;
-  padding: 15px;
-  border-radius: 10px;
 }
 
 .img_container {
