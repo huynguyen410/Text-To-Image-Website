@@ -10,7 +10,7 @@
     <script src="../js/script.js" defer></script>
     <script>
         window.onload = () => {
-            loadHistory(); // Gọi hàm loadHistory
+            loadHistory(); // Gọi loadHistory với trang mặc định
         };
     </script>
 </head>
@@ -43,11 +43,22 @@
             </nav>
 
             <div class="container mt-5">
-                <h2>Image History <i>(5 latest generations)</i></h2>
+                <h2>Image History</h2>
+                <!-- Dropdown chọn số mục hiển thị mỗi trang -->
+                <div class="d-flex justify-content-end mb-3">
+                    <select id="historyLimit" class="form-select w-auto">
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
                 <hr class="border-2 border-top bg-primary" />
                 <div class="row" id="image-history-container">
-                    <!-- Image history will be displayed here -->
+                    <!-- Các ảnh lịch sử sẽ được hiển thị tại đây -->
                 </div>
+                <!-- Container hiển thị các nút phân trang -->
+                <div id="history-pagination"></div>
             </div>
         </div>
     </div>

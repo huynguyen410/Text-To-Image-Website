@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert("You must be logged in to view history.");
                 return;
             }
-            window.location.href = 'image_history.php';
+            window.location.href = '../src/image_history.php';
         });
     });
 
@@ -191,31 +191,70 @@ const getUserInfo = async () => {
     return await response.json();
 };
 
-const loadHistory = async () => {
+const loadHistory = async (page = 1) => {
+    // Lấy giá trị limit từ dropdown có id "historyLimit"
+    const limit = parseInt(document.getElementById("historyLimit").value);
     try {
-        const response = await fetch("get_image_history.php");
+        const response = await fetch(`get_image_history.php?page=${page}&limit=${limit}`);
         const data = await response.json();
 
         if (data.success) {
-            const history = data.history;
-            let historyHTML = "";
+            const container = document.getElementById("image-history-container");
+            container.innerHTML = "";
 
-            history.forEach(item => {
-                historyHTML += `
+            // Hiển thị các thẻ ảnh (sử dụng lưới Bootstrap)
+            data.history.forEach(item => {
+                container.innerHTML += `
                     <div class="col-md-3 mb-3">
                         <div class="card">
                             <img src="${item.image_url}" class="card-img-top" alt="Image">
                             <div class="card-body">
                                 <h5 class="card-title">Prompt: ${item.prompt}</h5>
                                 <p class="card-text">Style: ${item.style}</p>
-                                <p class="card-text">Model: ${item.model}</p> 
+                                <p class="card-text">Model: ${item.model}</p>
                             </div>
                         </div>
                     </div>
                 `;
             });
 
-            document.getElementById("image-history-container").innerHTML = historyHTML;
+            // Tạo nút phân trang
+            let paginationHTML = `<nav><ul class="pagination justify-content-center">`;
+            
+            // Nút Previous
+            if (data.page > 1) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${data.page - 1}">Previous</a></li>`;
+            } else {
+                paginationHTML += `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
+            }
+            
+            // Hiển thị số trang
+            for (let i = 1; i <= data.total_pages; i++) {
+                if (i === data.page) {
+                    paginationHTML += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                } else {
+                    paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+                }
+            }
+            
+            // Nút Next
+            if (data.page < data.total_pages) {
+                paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${data.page + 1}">Next</a></li>`;
+            } else {
+                paginationHTML += `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
+            }
+            
+            paginationHTML += `</ul></nav>`;
+            document.getElementById("history-pagination").innerHTML = paginationHTML;
+
+            // Đăng ký sự kiện click cho các nút phân trang
+            document.querySelectorAll("#history-pagination a.page-link").forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const newPage = parseInt(this.getAttribute("data-page"));
+                    loadHistory(newPage);
+                });
+            });
         } else {
             alert("Failed to load image history: " + data.message);
         }
@@ -223,4 +262,15 @@ const loadHistory = async () => {
         console.error("Error loading image history:", error);
         alert("Error loading image history.");
     }
-}
+};
+
+// Sự kiện thay đổi dropdown số mục mỗi trang
+document.addEventListener("DOMContentLoaded", function() {
+    const historyLimitDropdown = document.getElementById("historyLimit");
+    if (historyLimitDropdown) {
+        historyLimitDropdown.addEventListener("change", () => {
+            loadHistory(1); // reset về trang 1 khi limit thay đổi
+        });
+    }
+});
+
