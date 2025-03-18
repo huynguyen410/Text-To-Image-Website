@@ -397,3 +397,9 @@ html, body {
   color: #000;
   background-color: transparent;
 }
+
+#users .btn-primary, #models .btn-primary {
+    display: block;
+    width: fit-content;
+    margin-bottom: 15px;
+}

@@ -1,5 +1,4 @@
 <?php
-ob_start();
 session_start();
 require_once '../src/db_connect.php';
 
@@ -12,7 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 $email = $_POST['email'] ?? '';
-$role = $_POST['role'] ?? ''; // Lấy role
+$role = $_POST['role'] ?? '';
 
 // Validate input (thêm kiểm tra nếu cần)
 if (empty($username) || empty($password) || empty($role)) {
@@ -23,9 +22,8 @@ if (empty($username) || empty($password) || empty($role)) {
 // Hash password
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-// Đặt số lần tạo ảnh theo role: admin có số lượng lớn, customer mặc định là 20
+// Đặt số lần tạo ảnh theo role
 $image_quota = ($role === 'admin') ? 99999 : 20;
-// Xác định isPremium: admin là yes, còn lại là no
 $isPremium = ($role === 'admin') ? 'yes' : 'no';
 
 $sql = "INSERT INTO users (username, password, email, role, image_quota, isPremium) VALUES (?, ?, ?, ?, ?, ?)";
@@ -34,6 +32,7 @@ if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Prepare failed: ' . mysqli_error($conn)]);
     exit;
 }
+
 mysqli_stmt_bind_param($stmt, "ssssis", $username, $hashed_password, $email, $role, $image_quota, $isPremium);
 
 if (mysqli_stmt_execute($stmt)) {
@@ -44,6 +43,5 @@ if (mysqli_stmt_execute($stmt)) {
 
 mysqli_stmt_close($stmt);
 mysqli_close($conn);
-ob_end_clean();
 exit;
 ?>
