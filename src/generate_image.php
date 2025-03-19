@@ -2,7 +2,7 @@
 header('Content-Type: application/json'); // Trả về JSON
 
 // API Token của Hugging Face (lấy từ tài khoản của bạn)
-define('HUGGINGFACE_API_TOKEN', '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');
+define('HUGGINGFACE_API_TOKEN', '');
 
 // Nhận dữ liệu từ client (prompt, style, modelId, quantity)
 $data = json_decode(file_get_contents('php://input'), true);
