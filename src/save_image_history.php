@@ -98,7 +98,7 @@ if (file_put_contents($file_path, $decoded_image) === false) {
 
 error_log("File written successfully: " . $file_path);
 
-$max_history_count = 150;
+$max_history_count = 100;
 $sql_count = "SELECT COUNT(DISTINCT creation_id) AS history_count FROM image_history WHERE user_id = ?";
 $stmt_count = mysqli_prepare($conn, $sql_count);
 if (!$stmt_count) {

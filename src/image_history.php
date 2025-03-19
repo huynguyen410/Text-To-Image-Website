@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <script src="../js/utils.js" defer></script>
     <script src="../js/script.js" defer></script>
+    <script src="../js/generate_image.js" defer></script>
+    <script src="../js/premium.js" defer></script>
     <script>
         window.onload = () => {
             loadHistory(); // Gọi loadHistory với trang mặc định
@@ -17,42 +21,82 @@
 <body>
     <div class="wrapper">
         <div class="content">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="../src/index.php">AI Image Generator</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="image_history.php" id="history-link">History</a>
-                            </li>
-                            <li class="nav-item" id="login-register-link">
-                                <a class="nav-link" href="#" id="login-link" data-bs-toggle="modal"
-                                    data-bs-target="#loginRegisterModal">Login</a>
-                            </li>
-                            <span class="nav-link me-2" id="username-display" style="display: none;"></span>
-                            <li class="nav-item" id="logout-link" style="display: none;">
-                                <a class="nav-link" href="#" id="logout-button">Logout</a>
-                            </li>
-                        </ul>
+            <!-- Navbar -->
+            <?php include_once 'navbar.php'; ?>
+
+            <!-- Premium Modal (Demo thanh toán) -->
+            <div class="modal fade" id="premiumModal" tabindex="-1" aria-labelledby="premiumModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="premiumModalLabel">Thanh toán Premium</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <!-- Phần chọn gói Premium -->
+                    <h6 class="mb-3">Chọn gói Premium của bạn</h6>
+                    <div class="btn-group d-flex" role="group" aria-label="Premium Packages">
+                        <input type="radio" class="btn-check" name="package" id="package1" autocomplete="off" value="1" checked>
+                        <label class="btn btn-outline-primary flex-fill" for="package1">1 Tháng</label>
+
+                        <input type="radio" class="btn-check" name="package" id="package3" autocomplete="off" value="3">
+                        <label class="btn btn-outline-primary flex-fill" for="package3">3 Tháng</label>
+
+                        <input type="radio" class="btn-check" name="package" id="package6" autocomplete="off" value="6">
+                        <label class="btn btn-outline-primary flex-fill" for="package6">6 Tháng</label>
+
+                        <input type="radio" class="btn-check" name="package" id="package12" autocomplete="off" value="12">
+                        <label class="btn btn-outline-primary flex-fill" for="package12">1 Năm</label>
+                    </div>
+                    <!-- Nút hiển thị thông tin thanh toán -->
+                    <div class="mt-4">
+                        <button id="showPaymentInfoBtn" class="btn btn-info">Xem thông tin thanh toán</button>
+                    </div>
+                    <!-- Phần hiển thị thông tin thanh toán (ẩn mặc định) -->
+                    <div id="paymentInfo" class="mt-3" style="display: none;">
+                        <!-- Nội dung thanh toán sẽ được cập nhật bởi JavaScript -->
+                    </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="confirmPremiumBtn">Đã chuyển khoản</button>
                     </div>
                 </div>
-            </nav>
-
-            <div class="container mt-5">
-                <h2>Image History</h2>
-                <!-- Dropdown chọn số mục hiển thị mỗi trang -->
-                <div class="d-flex justify-content-end mb-3">
-                    <select id="historyLimit" class="form-select w-auto">
-                        <option value="10" selected>10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
                 </div>
+            </div>
+
+            <!-- Modal Thông Báo -->
+            <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="notificationModalLabel">Thông Báo</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="notificationModalBody">
+                            <!-- Nội dung thông báo sẽ được chèn vào đây -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch sử hình ảnh -->
+            <div class="container mt-5">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h2>Image History</h2>
+                    <!-- Dropdown chọn số mục hiển thị mỗi trang -->
+                    <div>
+                        <select id="historyLimit" class="form-select w-auto">
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+
                 <hr class="border-2 border-top bg-primary" />
                 <div class="row" id="image-history-container">
                     <!-- Các ảnh lịch sử sẽ được hiển thị tại đây -->

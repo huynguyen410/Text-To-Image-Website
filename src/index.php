@@ -27,6 +27,7 @@
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Custom Scripts -->
+  <script src="../js/utils.js" defer></script>
   <script src="../js/script.js" defer></script>
   <script src="../js/generate_image.js" defer></script>
   <!-- Premium script đã chuyển vào project/js/ -->
@@ -36,42 +37,7 @@
   <div class="wrapper">
     <div class="content">
       <!-- Navbar -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-          <!-- Vì index.php nằm trong src, link đến chính nó chỉ cần 'index.php' -->
-          <a class="navbar-brand" href="index.php">AI Image Generator</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                  aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-              <!-- Nút Đăng ký Premium -->
-              <li class="nav-item" id="premium-item">
-                <button type="button" class="btn btn-warning" id="premiumBtn">Đăng ký Premium</button>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="image_history.php" id="history-link">History</a>
-              </li>
-              <!-- Hiển thị số lượt tạo ảnh -->
-              <li class="nav-item" id="quota-item">
-                <span class="nav-link">
-                  <i class="bi bi-lightning-fill"></i>
-                  Lượt tạo ảnh: <span id="userQuota">0</span>
-                </span>
-              </li>
-              <!-- Login/Logout -->
-              <li class="nav-item" id="login-register-link">
-                <a class="nav-link" href="#" id="login-link" data-bs-toggle="modal" data-bs-target="#loginRegisterModal">Login</a>
-              </li>
-              <span class="nav-link me-2" id="username-display" style="display: none;"></span>
-              <li class="nav-item" id="logout-link" style="display: none;">
-                <a class="nav-link" href="#" id="logout-button">Logout</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+      <?php include_once 'navbar.php';?>
 
       <!-- Premium Modal (Demo thanh toán) -->
       <div class="modal fade" id="premiumModal" tabindex="-1" aria-labelledby="premiumModalLabel" aria-hidden="true">
@@ -113,7 +79,24 @@
         </div>
       </div>
 
-
+      <!-- Modal Thông Báo -->
+      <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="notificationModalLabel">Thông Báo</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body" id="notificationModalBody">
+                      <!-- Nội dung thông báo sẽ được chèn vào đây -->
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      
       <!-- Toast Notification Container -->
       <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="formatToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -217,19 +200,19 @@
             <div class="modal-body">
               <form id="detailedPromptForm">
                 <div class="mb-3">
-                  <label for="backgroundInput" class="form-label visually-hidden">Background:</label>
-                  <input type="text" class="form-control" id="backgroundInput" placeholder="Background: (e.g., A majestic mountain range)">
+                  <label for="backgroundInput" class="form-label">Background:</label>
+                  <input type="text" class="form-control" id="backgroundInput" placeholder="Background(e.g., A majestic mountain range)">
                 </div>
                 <div class="mb-3">
-                  <label for="characterInput" class="form-label visually-hidden">Character:</label>
+                  <label for="characterInput" class="form-label">Character:</label>
                   <input type="text" class="form-control" id="characterInput" placeholder="Character: (e.g., A brave knight in shining armor)">
                 </div>
                 <div class="mb-3">
-                  <label for="hairstyleInput" class="form-label visually-hidden">Hairstyle:</label>
+                  <label for="hairstyleInput" class="form-label">Hairstyle:</label>
                   <input type="text" class="form-control" id="hairstyleInput" placeholder="Hairstyle: (e.g., Long hair)">
                 </div>
                 <div class="mb-3">
-                  <label for="skinColorInput" class="form-label visually-hidden">Skin Color:</label>
+                  <label for="skinColorInput" class="form-label">Skin Color:</label>
                   <input type="text" class="form-control" id="skinColorInput" placeholder="Skin Color: (e.g., Pale, dark, bronze)">
                 </div>
               </form>

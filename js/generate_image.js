@@ -13,12 +13,15 @@ const characterInput = document.getElementById('characterInput');
 const hairstyleInput = document.getElementById('hairstyleInput');
 const skinColorInput = document.getElementById('skinColorInput');
 const generateFromDetailsBtn = document.getElementById('generateFromDetails');
+
+// Thêm check if cho premiumBtn
 const premiumBtn = document.getElementById("premiumBtn");
-// console.log("premiumBtn:", premiumBtn);
-premiumBtn.addEventListener("click", function() {
-  console.log("premiumBtn clicked");
-  // ...
-});
+if(premiumBtn){
+    premiumBtn.addEventListener("click", function() {
+    console.log("premiumBtn clicked");
+    // ...
+    });
+}
 
 // Store generated images by model
 let generatedImages = {
@@ -27,7 +30,10 @@ let generatedImages = {
   "strangerzonehf/Flux-Midjourney-Mix2-LoRA": []
 };
 
-formatSelect.addEventListener("change", handleFormatChange);
+if(formatSelect){
+    formatSelect.addEventListener("change", handleFormatChange);
+}
+
 
 function handleFormatChange(e) {
   const newFormat = e.target.value;
@@ -54,23 +60,6 @@ function convertImageFormat(newFormat) {
   });
 }
 
-function showAlert(message, type) {
-  const toastElement = document.getElementById("formatToast");
-  if (toastElement) {
-    toastElement.querySelector(".toast-body").innerText = message;
-    toastElement.classList.remove("text-bg-success", "text-bg-danger", "text-bg-warning");
-    if (type === "success") {
-      toastElement.classList.add("text-bg-success");
-    } else if (type === "danger") {
-      toastElement.classList.add("text-bg-danger");
-    } else {
-      toastElement.classList.add("text-bg-warning");
-    }
-    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
-    toast.show();
-  }
-}
-
 function updateUserQuota() {
   // Sửa đường dẫn thành file update_image_quota.php nằm trong src
   return fetch("update_image_quota.php", { method: "POST" })
@@ -81,47 +70,23 @@ function updateUserQuota() {
     });
 }
 
-function getCurrentUserInfo() {
-  // Sửa đường dẫn thành file get_user_info.php nằm trong src
-  return fetch("get_user_info.php")
-    .then(response => response.json())
-    .catch(error => {
-      showAlert("Không thể lấy thông tin người dùng.", "danger");
-      return { success: false };
-    });
-}
-
-function updateQuotaDisplay() {
-  const quotaItem = document.getElementById("quota-item");
-  const userQuotaSpan = document.getElementById("userQuota");
-  const premiumItem = document.getElementById("premium-item");
-
-  getCurrentUserInfo().then(userInfo => {
-    if (userInfo.success) {
-      quotaItem.style.display = "block";
-      userQuotaSpan.innerText = userInfo.user.image_quota;
-      premiumItem.style.display = "block";
-    } else {
-      quotaItem.style.display = "none";
-      premiumItem.style.display = "block";
-      userQuotaSpan.innerText = "0";
-    }
-  });
-}
-
 const showDefaultImages = () => {
   const defaultContainer = document.querySelector("#default-container");
-  defaultContainer.innerHTML = "";
-  const defaultImages = [
-    "../images/img-1.jpg",
-    "../images/img-2.jpg",
-    "../images/img-3.jpg",
-    "../images/img-4.jpg"
-  ];
-  defaultImages.forEach((url, index) => {
-    const imgCard = createImageCard(url, index);
-    defaultContainer.appendChild(imgCard);
-  });
+  if (defaultContainer) { // Kiểm tra xem defaultContainer có tồn tại không
+    defaultContainer.innerHTML = "";
+    const defaultImages = [
+      "../images/img-1.jpg",
+      "../images/img-2.jpg",
+      "../images/img-3.jpg",
+      "../images/img-4.jpg"
+    ];
+    defaultImages.forEach((url, index) => {
+      const imgCard = createImageCard(url, index);
+      defaultContainer.appendChild(imgCard);
+    });
+  } else {
+    console.log("Không tìm thấy phần tử có id 'default-container'"); // Ghi log để dễ debug
+  }
 };
 
 const createImageCard = (url, index) => {
@@ -258,8 +223,10 @@ const generateAiImages = async (prompt, style, quantity, selectedModels) => {
     showAlert("Có lỗi xảy ra khi tạo ảnh. Vui lòng thử lại sau.", "danger");
   } finally {
     isImageGenerating = false;
-    generateBtn.removeAttribute("disabled");
-    generateBtn.innerText = "Generate";
+    if(generateBtn){
+        generateBtn.removeAttribute("disabled");
+        generateBtn.innerText = "Generate";
+    }
   }
 };
 
@@ -316,8 +283,10 @@ const handleImageGeneration = (e) => {
     updateUserQuota().then(result => {
       if (!result.success) {
         showAlert("Không thể cập nhật lượt tạo ảnh. Vui lòng thử lại sau.", "danger");
-        generateBtn.removeAttribute("disabled");
-        generateBtn.innerText = "Generate";
+        if(generateBtn){
+            generateBtn.removeAttribute("disabled");
+            generateBtn.innerText = "Generate";
+        }
         return;
       }
       updateQuotaDisplay();
@@ -329,8 +298,10 @@ const handleImageGeneration = (e) => {
         showAlert("Vui lòng chọn ít nhất 1 mô hình.", "warning");
         return;
       }
-      generateBtn.setAttribute("disabled", true);
-      generateBtn.innerText = "Generating";
+      if(generateBtn){
+          generateBtn.setAttribute("disabled", true);
+          generateBtn.innerText = "Generating";
+      }
       isImageGenerating = true;
 
       // Debug: Log các checkbox để kiểm tra
@@ -408,7 +379,10 @@ const updateImageContainer = (selectedModels) => {
   });
 };
 
-generateForm.addEventListener("submit", handleImageGeneration);
+if(generateForm){
+    generateForm.addEventListener("submit", handleImageGeneration);
+}
+
 
 const saveImageToHistory = async (prompt, style, imageUrl, blobSize, modelId) => {
   try {
@@ -458,13 +432,16 @@ const saveImageToHistory = async (prompt, style, imageUrl, blobSize, modelId) =>
   }
 };
 
-let modalInstance;
-showDetailedPromptFormBtn.addEventListener('click', () => {
-  const modalElement = document.getElementById('detailedPromptModal');
-  modalElement.inert = false;
-  modalInstance = new bootstrap.Modal(modalElement);
-  modalInstance.show();
-});
+if(showDetailedPromptFormBtn){
+    let modalInstance;
+    showDetailedPromptFormBtn.addEventListener('click', () => {
+      const modalElement = document.getElementById('detailedPromptModal');
+      modalElement.inert = false;
+      modalInstance = new bootstrap.Modal(modalElement);
+      modalInstance.show();
+    });
+}
+
 
 const resetModal = () => {
   backgroundInput.value = "";
@@ -473,24 +450,30 @@ const resetModal = () => {
   skinColorInput.value = "";
 };
 
-detailedPromptModal.addEventListener('hidden.bs.modal', function (event) {
-  resetModal();
-  document.body.classList.remove('modal-open');
-  document.body.style.overflow = 'auto';
-  const modalBackdrop = document.querySelector('.modal-backdrop');
-  if (modalBackdrop) {
-    modalBackdrop.remove();
-  }
-});
+if(detailedPromptModal){
+    detailedPromptModal.addEventListener('hidden.bs.modal', function (event) {
+      resetModal();
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = 'auto';
+      const modalBackdrop = document.querySelector('.modal-backdrop');
+      if (modalBackdrop) {
+        modalBackdrop.remove();
+      }
+    });
+}
 
-generateFromDetailsBtn.addEventListener('click', () => {
-  let detailedPrompt = "";
-  if (backgroundInput.value) detailedPrompt += `Background: ${backgroundInput.value}, `;
-  if (characterInput.value) detailedPrompt += `Character: ${characterInput.value}, `;
-  if (hairstyleInput.value) detailedPrompt += `Hairstyle: ${hairstyleInput.value}, `;
-  if (skinColorInput.value) detailedPrompt += `Skin Color: ${skinColorInput.value}, `;
-  promptInput.value = detailedPrompt;
-});
+
+if(generateFromDetailsBtn){
+    generateFromDetailsBtn.addEventListener('click', () => {
+      let detailedPrompt = "";
+      if (backgroundInput.value) detailedPrompt += `Background: ${backgroundInput.value}, `;
+      if (characterInput.value) detailedPrompt += `Character: ${characterInput.value}, `;
+      if (hairstyleInput.value) detailedPrompt += `Hairstyle: ${hairstyleInput.value}, `;
+      if (skinColorInput.value) detailedPrompt += `Skin Color: ${skinColorInput.value}, `;
+      promptInput.value = detailedPrompt;
+    });
+}
+
 
 // Đảm bảo các event listener khác (như confirmPremiumBtn) không gây xung đột
 document.addEventListener("DOMContentLoaded", () => {
