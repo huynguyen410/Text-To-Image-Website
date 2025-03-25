@@ -68,6 +68,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                             Models
                         </button>
                     </li>
+                    <!-- Tab Invoices -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices" 
+                                type="button" role="tab" aria-controls="invoices" aria-selected="false">
+                            Invoices
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="tab-content" id="myTabContent">
@@ -104,6 +111,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                         <!-- Bọc danh sách model vào div có scroll -->
                         <div class="table-responsive scrollable-table">
                             <div id="model-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Invoices -->
+                    <div class="tab-pane fade" id="invoices" role="tabpanel" aria-labelledby="invoices-tab">
+                        <h2 class="mt-3">Invoices</h2>
+                        <div class="d-flex justify-content-end align-items-center mb-3">
+                            <select id="invoiceLimit" class="form-select w-auto">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <!-- Bọc danh sách invoice vào div có scroll -->
+                        <div class="table-responsive scrollable-table">
+                            <div id="invoice-list"></div>
                         </div>
                     </div>
                 </div>
@@ -175,6 +199,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                         </div>
                     </div>
                 </div>
+
+                <!-- Lưu ý: Đã xóa Modal for Add Invoice và Modal for Edit Invoice vì invoice không cần chức năng thêm, sửa, xóa -->
             </div> <!-- end .container -->
         </div> <!-- end .content -->
     </div> <!-- end .wrapper -->

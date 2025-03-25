@@ -24,8 +24,13 @@ $totalRow = mysqli_fetch_assoc($countResult);
 $total = $totalRow['total'];
 $total_pages = ceil($total / $limit);
 
-// Lấy danh sách người dùng theo phân trang
-$sql = "SELECT id, username, email, created_at, role FROM users LIMIT $limit OFFSET $offset";
+// Lấy danh sách người dùng theo phân trang, thêm các cột isPremium, startPremium, endPremium
+$sql = "SELECT id, username, email, created_at, role, 
+               isPremium as is_premium, 
+               startPremium as start_premium, 
+               endPremium as end_premium 
+        FROM users 
+        LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 
 $users = array();

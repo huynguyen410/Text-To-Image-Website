@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$sql = "SELECT id, username, image_quota, isPremium FROM users WHERE id = ?";
+$sql = "SELECT id, username, image_quota, isPremium, endPremium FROM users WHERE id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => mysqli_error($conn)]);
@@ -21,7 +21,6 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 if ($row = mysqli_fetch_assoc($result)) {
-    // Nếu user premium thì hiển thị quota là "Unlimited", ngược lại là số lượt thực tế
     $quota = ($row['isPremium'] === 'yes') ? "Unlimited" : (int)$row['image_quota'];
     $role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
     echo json_encode([
@@ -31,7 +30,8 @@ if ($row = mysqli_fetch_assoc($result)) {
             'username' => $row['username'],
             'role' => $role,
             'image_quota' => $quota,
-            'isPremium' => $row['isPremium']
+            'isPremium' => $row['isPremium'],
+            'endPremium' => $row['endPremium']
         ]
     ]);
 } else {
