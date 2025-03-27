@@ -51,30 +51,65 @@ function initApp() {
   }
 
   // Xử lý OAuth 2.0 để lấy access token
-  function authorizeGmail() {
-    return new Promise((resolve, reject) => {
-      // Nếu đã có token, ta sử dụng lại
-      if (accessToken) {
-        resolve();
-        return;
-      }
-      const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: (response) => {
-          if (response && response.access_token) {
-            accessToken = response.access_token;
-            gapi.auth.setToken({ access_token: accessToken });
-            resolve();
-          } else {
-            reject("Không lấy được access token");
+ // Trong hàm initApp()
+ function authorizeGmail() {
+  return new Promise((resolve, reject) => {
+      fetch("../src/gmail_token_manager.php", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
           }
-        },
-        prompt: '' // Không ép buộc hiển thị popup nếu đã đăng nhập
+      })
+      .then(response => {
+          console.log("Phản hồi từ server:", response); // Debug
+          return response.json();
+      })
+      .then(token => {
+          console.log("Token nhận được:", token); // Debug
+          if (token && token !== null) {
+              accessToken = token;
+              gapi.auth.setToken({ access_token: accessToken });
+              resolve();
+          } else {
+              const tokenClient = google.accounts.oauth2.initTokenClient({
+                  client_id: CLIENT_ID,
+                  scope: SCOPES,
+                  callback: (response) => {
+                      if (response && response.access_token) {
+                          accessToken = response.access_token;
+                          gapi.auth.setToken({ access_token: accessToken });
+                          
+                          fetch("../src/gmail_token_manager.php", {
+                              method: "POST",
+                              headers: {
+                                  "Content-Type": "application/json"
+                              },
+                              body: JSON.stringify({
+                                  access_token: response.access_token,
+                                  expires_in: response.expires_in || 3600,
+                                  refresh_token: response.refresh_token || null
+                              })
+                          })
+                          .then(() => resolve())
+                          .catch(error => {
+                              console.error("Lỗi khi lưu token về server:", error);
+                              reject(error);
+                          });
+                      } else {
+                          reject("Không lấy được access token");
+                      }
+                  },
+                  prompt: ''
+              });
+              tokenClient.requestAccessToken({ prompt: '' });
+          }
+      })
+      .catch(error => {
+          console.error("Lỗi khi kiểm tra token từ server:", error);
+          reject(error);
       });
-      tokenClient.requestAccessToken({ prompt: '' }); // Không yêu cầu chọn lại tài khoản
-    });
-  }
+  });
+}
 
   // Kiểm tra email từ Timo Support
   function checkGmailForTransfer(expectedAmount, expectedDescription) {
