@@ -3,15 +3,15 @@ session_start();
 require_once '../src/db_connect.php';
 
 // Kiểm tra xem người dùng đã đăng nhập và có quyền admin hay chưa
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { 
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$id = $_GET['id'];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Validate input
-if (empty($id)) {
+if ($id <= 0) {
     echo "Model ID is required.";
     exit;
 }
@@ -25,6 +25,7 @@ $result = mysqli_stmt_get_result($stmt);
 if ($row = mysqli_fetch_assoc($result)) {
     ?>
     <form id="edit_model_form">
+        <input type="hidden" name="id" value="<?php echo htmlspecialchars($row['id']); ?>">
         <div class="mb-3">
             <label for="model_id" class="form-label">Model ID</label>
             <input type="text" class="form-control" id="model_id" name="model_id" value="<?php echo htmlspecialchars($row['model_id']); ?>" required>
@@ -39,7 +40,7 @@ if ($row = mysqli_fetch_assoc($result)) {
         </div>
         <div class="mb-3">
             <label for="status" class="form-label">Status</label>
-            <select class="form-select" id="status" name="status">
+            <select class="form-select" id="status" name="status" required>
                 <option value="active" <?php if ($row['status'] == 'active') echo 'selected'; ?>>Active</option>
                 <option value="inactive" <?php if ($row['status'] == 'inactive') echo 'selected'; ?>>Inactive</option>
             </select>
