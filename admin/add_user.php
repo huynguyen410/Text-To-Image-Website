@@ -1,9 +1,10 @@
 <?php
 session_start();
+header('Content-Type: application/json');
 require_once '../src/db_connect.php';
 
 // Kiểm tra xem người dùng đã đăng nhập và có quyền admin hay chưa
-if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
@@ -37,11 +38,12 @@ mysqli_stmt_bind_param($stmt, "ssssis", $username, $hashed_password, $email, $ro
 
 if (mysqli_stmt_execute($stmt)) {
     echo json_encode(['success' => true, 'message' => 'User added successfully']);
+    exit;
 } else {
     echo json_encode(['success' => false, 'message' => 'Error: ' . mysqli_error($conn)]);
+    exit;
 }
 
 mysqli_stmt_close($stmt);
 mysqli_close($conn);
-exit;
 ?>

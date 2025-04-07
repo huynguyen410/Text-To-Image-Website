@@ -16,28 +16,3 @@
         <button type="submit" class="btn btn-primary">Add Model</button>
     </div>
 </form>
-<script>
-$(document).ready(function() {
-    $('#add_model_form').submit(function(event) {
-        event.preventDefault();
-        $.ajax({
-            url: 'add_model.php',
-            type: 'POST',
-            data: $(this).serialize(),
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    alert('Model added successfully!');
-                    $('#addModelModal').modal('hide');
-                    loadModels(); 
-                } else {
-                    alert('Failed to add model: ' + response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('Failed to add model: ' + error);
-            }
-        });
-    });
-});
-</script>

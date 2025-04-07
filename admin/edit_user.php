@@ -12,6 +12,7 @@ $id = $_POST['id'];
 $username = $_POST['username'];
 $email = $_POST['email'];
 $password = isset($_POST['password']) ? $_POST['password'] : '';
+$confirm_password = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : ''; // Get confirm_password
 
 // Validate input
 if (empty($username)) {
@@ -27,7 +28,17 @@ if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 // Chuẩn bị câu lệnh SQL
 if (!empty($password)) {
-    // Nếu có mật khẩu mới, mã hóa và cập nhật cả mật khẩu
+    // Validate confirm password
+    if (empty($confirm_password)) {
+        echo json_encode(['success' => false, 'message' => 'Please confirm the new password']);
+        exit;
+    }
+    if ($password !== $confirm_password) {
+        echo json_encode(['success' => false, 'message' => 'Passwords do not match']);
+        exit;
+    }
+
+    // Nếu mật khẩu mới hợp lệ, mã hóa và cập nhật cả mật khẩu
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $sql = "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);

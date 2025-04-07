@@ -1,51 +1,186 @@
 $(document).ready(function () {
+    // --- Modal Instances (khởi tạo một lần) ---
+    const confirmationModalEl = document.getElementById('confirmationModal');
+    const confirmationModal = confirmationModalEl ? new bootstrap.Modal(confirmationModalEl) : null;
+    const infoModalEl = document.getElementById('infoModal');
+    const infoModal = infoModalEl ? new bootstrap.Modal(infoModalEl) : null;
+
+    // --- Helper Functions for Modals ---
+    function showInfoModal(title, message, isSuccess = true) {
+        if (!infoModal) return; // Kiểm tra modal tồn tại
+        $('#infoModalLabel').text(title);
+        $('#infoModalBody').html(message); // Sử dụng html() để có thể hiển thị HTML nếu cần
+        const header = $('#infoModalHeader');
+        header.removeClass('bg-success bg-danger text-white').addClass(isSuccess ? 'bg-success text-white' : 'bg-danger text-white');
+        infoModal.show();
+    }
+
+    function showConfirmationModal(title, message, confirmCallback) {
+        if (!confirmationModal) return; // Kiểm tra modal tồn tại
+        $('#confirmationModalLabel').text(title);
+        $('#confirmationModalBody').html(message); // Sử dụng html()
+
+        // Gắn sự kiện click một lần vào nút confirm
+        $('#confirmActionButton').off('click').one('click', function() {
+            confirmationModal.hide();
+            if (typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+        });
+
+        confirmationModal.show();
+    }
+
+    // --- Sidebar Navigation Logic ---
+    function updateContent(hash) {
+        hash = hash || location.hash || '#users'; // Default to #users if no hash
+        
+        // Hide all sections
+        $('.admin-section').addClass('d-none');
+        
+        // Show the target section
+        try {
+            $(hash).removeClass('d-none');
+        } catch (e) {
+            console.error("Invalid hash selector:", hash); 
+            $('#users').removeClass('d-none'); // Fallback to users section
+            hash = '#users'; // Reset hash to default
+        }
+
+        // Update active state in sidebar
+        $('#adminSidebar .nav-link').removeClass('active');
+        $('#adminSidebar .nav-link[href="' + hash + '"]').addClass('active');
+
+        // Update main content title (optional)
+        let title = 'Admin Panel'; // Default title
+        const activeLinkText = $('#adminSidebar .nav-link.active').text().trim();
+        if (activeLinkText) {
+            title = activeLinkText + ' Management'; // Or customize as needed
+        }
+        $('#content-title').text(title);
+    }
+
+    // Initial content load based on hash
+    updateContent();
+
+    // Handle hash changes (clicking sidebar links)
+    $(window).on('hashchange', function() {
+        updateContent();
+    });
+
+    // Ensure clicking the link updates the hash (for browsers that might not automatically)
+     $('#adminSidebar .nav-link').on('click', function(e) {
+        const targetHash = $(this).attr('href');
+        if (location.hash !== targetHash) {
+             // Let the hashchange event handle the content update
+             location.hash = targetHash;
+        }
+        // If hash is already correct, manually trigger update in case content wasn't loaded
+        else {
+            updateContent(targetHash);
+        }
+     });
+
     // Hàm chung để tải danh sách với phân trang và limit có thể thay đổi
     function loadList({ url, target, entity, fields, modalId, page = 1, limit = 10 }) {
+        // Only load data if the corresponding section is visible
+        // This prevents unnecessary loads when switching tabs quickly
+        // However, we might want to load initially regardless, so this check is commented out for now.
+        // Consider adding it back if performance becomes an issue.
+        // const sectionId = `#${entity}s`; // Assumes section ID is plural of entity
+        // if ($(sectionId).hasClass('d-none')) { 
+        //    console.log(`Section ${sectionId} is hidden, skipping load for ${entity}`);
+        //    return; 
+        // }
+        
+        const listContainer = $(target);
+        listContainer.html('<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'); // Show spinner
+
         $.ajax({
             url: url,
             type: 'GET',
             dataType: 'json',
-            data: { page: page, limit: limit }, // gửi cả page và limit
+            data: { page: page, limit: limit }, 
             success: function (data) {
                 if (data.success) {
-                    let html = '<table class="table">';
-                    html += `<thead><tr>${fields.map(f => `<th>${f}</th>`).join('')}${entity !== 'invoice' ? '<th>Actions</th>' : ''}</tr></thead>`;
+                    let html = '<table class="table table-hover table-sm align-middle">';
+                    // Add text-center to specific headers
+                    const centeredColumns = ['role', 'is_premium', 'status']; // Columns to center
+                    html += '<thead><tr>';
+                    fields.forEach(f => {
+                        const key = f.toLowerCase().replace(' ', '_');
+                        const thClass = centeredColumns.includes(key) ? ' class="text-center"' : '';
+                        html += `<th${thClass}>${f}</th>`;
+                    });
+                    html += `${entity !== 'invoice' ? '<th>Actions</th>' : ''}</tr></thead>`;
                     html += '<tbody>';
-                    data[entity].forEach(item => {
+                    data[entity].forEach((item, index) => {
+                        const rowNumber = (page - 1) * limit + index + 1; // Calculate sequential row number
                         html += '<tr>';
-                        fields.forEach(field => {
+                        fields.forEach((field, fieldIndex) => { // Get field index
                             let value;
-                            // Nếu entity là user, kiểm tra các cột premium
-                            if (entity === 'user') {
-                                if (field === 'Is Premium') {
-                                    value = item.isPremium;
-                                    value = value && value.toLowerCase() === 'yes' ? 'Yes' : 'No';
-                                } else if (field === 'Start Premium') {
-                                    value = item.startPremium || '-';
-                                } else if (field === 'End Premium') {
-                                    value = item.endPremium || '-';
-                                } else {
-                                    value = item[field.toLowerCase().replace(' ', '_')] || '-';
-                                }
+                            let displayValue = '-';
+                            const key = field.toLowerCase().replace(' ', '_');
+                            let tdClass = ''; 
+
+                            // Use rowNumber for the first column (index 0)
+                            if (fieldIndex === 0) {
+                                displayValue = rowNumber;
                             } else {
-                                // Với các entity khác (model, invoice) giả định key đặt tên theo định dạng chữ thường và dấu gạch dưới
-                                value = item[field.toLowerCase().replace(' ', '_')] || '-';
+                                value = item[key] || null;
+
+                                if (entity === 'user') {
+                                    if (key === 'is_premium') {
+                                        displayValue = (value && value.toLowerCase() === 'yes') 
+                                                        ? '<span class="badge bg-success">Yes</span>' 
+                                                        : '<span class="badge bg-secondary">No</span>';
+                                        tdClass = 'text-center'; // Căn giữa cột này
+                                    } else if (key === 'role') {
+                                        if (value && value.toLowerCase() === 'admin') {
+                                            displayValue = '<span class="badge bg-primary">Admin</span>';
+                                        } else {
+                                            displayValue = '<span class="badge bg-secondary">Customer</span>';
+                                        }
+                                        tdClass = 'text-center'; // Căn giữa cột này
+                                    } else {
+                                        displayValue = value ? escapeHtml(value) : '-';
+                                    }
+                                } else if (entity === 'model') {
+                                    if (key === 'status') {
+                                        if (value && value.toLowerCase() === 'active') {
+                                            displayValue = '<span class="badge bg-success">Active</span>';
+                                        } else {
+                                            displayValue = '<span class="badge bg-warning">Inactive</span>';
+                                        }
+                                        tdClass = 'text-center'; // Căn giữa cột này
+                                    } else {
+                                        displayValue = value ? escapeHtml(value) : '-';
+                                    }
+                                } else {
+                                    displayValue = value ? escapeHtml(value) : '-';
+                                }
                             }
-                            html += `<td>${$('<div/>').text(value).html()}</td>`;
+
+                            html += `<td${tdClass ? ' class="' + tdClass + '"' : ''}>${displayValue}</td>`;
                         });
                         
-                        // Chỉ render cột Actions nếu entity không phải invoice
                         if (entity !== 'invoice') {
-                            html += `<td>
-                                <button class="btn btn-sm btn-warning edit-${entity}" data-id="${item.id || item.invoice_id}" data-bs-toggle="modal" data-bs-target="#${modalId}">Edit</button>
-                                <button class="btn btn-sm btn-danger delete-${entity}" data-id="${item.id || item.invoice_id}">Delete</button>
+                            const entityId = item.id; // Use actual item.id for actions, not rowNumber!
+                            html += `<td class="text-nowrap">
+                                <button class="btn btn-sm btn-outline-warning edit-${entity} me-1" data-id="${entityId}" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-${entity}" data-id="${entityId}" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </td>`;
+                        } else {
+                             // Handle potential actions for invoices if needed in the future
                         }
                         html += '</tr>';
                     });
                     html += '</tbody></table>';
 
-                    // Thêm phân trang nếu có nhiều hơn 1 trang
                     if (data.total_pages && data.total_pages > 1) {
                         html += '<nav><ul class="pagination">';
                         if (data.page > 1) {
@@ -70,14 +205,12 @@ $(document).ready(function () {
 
                     $(target).html(html);
 
-                    // Đăng ký sự kiện cho các nút phân trang
                     $(target).find('.pagination a.page-link').on('click', function(e){
                         e.preventDefault();
                         const newPage = $(this).data('page');
                         loadList({ url, target, entity, fields, modalId, page: newPage, limit: limit });
                     });
 
-                    // Sự kiện chỉnh sửa (chỉ áp dụng cho user và model)
                     if (entity !== 'invoice') {
                         $(`.edit-${entity}`).on('click', function () {
                             const id = $(this).data('id');
@@ -87,50 +220,91 @@ $(document).ready(function () {
                             });
                         });
 
-                        // Sự kiện xóa
                         $(`.delete-${entity}`).on('click', function () {
                             const id = $(this).data('id');
-                            if (confirm(`Are you sure you want to delete this ${entity}?`)) {
-                                $.ajax({
-                                    url: `../admin/delete_${entity}.php`,
-                                    type: 'POST',
-                                    data: { id },
-                                    dataType: 'json',
-                                    success: response => {
-                                        alert(response.success ? `${entity.charAt(0).toUpperCase() + entity.slice(1)} deleted successfully!` : `Failed to delete ${entity}: ${response.message}`);
-                                        if (response.success) loadList({ url, target, entity, fields, modalId, page: page, limit: limit });
-                                    },
-                                    error: (xhr, status, error) => alert(`Failed to delete ${entity}: ${error}`)
-                                });
-                            }
+                            const entityName = entity.charAt(0).toUpperCase() + entity.slice(1);
+                            
+                            showConfirmationModal(
+                                `Confirm Deletion`, 
+                                `Are you sure you want to delete this ${entityName}?`, 
+                                function() { // Callback khi nhấn Confirm
+                                    $.ajax({
+                                        url: `../admin/delete_${entity}.php`,
+                                        type: 'POST',
+                                        data: { id },
+                                        dataType: 'json',
+                                        success: response => {
+                                            showInfoModal(
+                                                response.success ? 'Success' : 'Error',
+                                                response.message || (response.success ? `${entityName} deleted successfully!` : `Failed to delete ${entityName}.`), 
+                                                response.success
+                                            );
+                                            if (response.success) {
+                                                // Tải lại trang hiện tại sau khi xóa thành công
+                                                loadList({ url, target, entity, fields, modalId, page: data.page, limit: limit });
+                                            }
+                                        },
+                                        error: (xhr, status, error) => {
+                                            showInfoModal(
+                                                'Error',
+                                                `Failed to delete ${entityName}. Server error: ${error}`,
+                                                false
+                                            );
+                                        }
+                                    });
+                                }
+                            );
                         });
                     }
                 } else {
-                    $(target).html(`<p class="text-danger">${data.message}</p>`);
+                    showInfoModal('Error Loading Data', data.message || `Failed to load ${entity} list.`, false);
+                    $(target).html(`<p class="text-danger text-center">Error loading data. Please try again.</p>`);
                 }
             },
-            error: (xhr, status, error) => $(target).html(`<p class="text-danger">Failed to load ${entity}s. Status: ${status}, Error: ${error}</p>`)
+            error: (xhr, status, error) => {
+                showInfoModal('Network Error', `Failed to load ${entity}s. Status: ${status}, Error: ${error}`, false);
+                $(target).html(`<p class="text-danger text-center">Failed to load data. Check connection or server status.</p>`);
+            }
         });
     }
 
     // Hàm lưu chỉnh sửa (không thay đổi cho user và model)
     function saveEdit({ modalId, entity, formId, url, reloadFn }) {
-        $(`#saveEdit${entity.charAt(0).toUpperCase() + entity.slice(1)}`).on('click', function () {
-            const modal = $(`#${modalId}`);
+        const modalElement = $(`#${modalId}`);
+        modalElement.find('.modal-footer .btn-primary').off('click').on('click', function () { 
+            const form = modalElement.find(`#${formId}`)[0];
+            if (form && typeof form.checkValidity === 'function' && !form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
             const formData = $(`#${formId}`).serialize();
+            const entityName = entity.charAt(0).toUpperCase() + entity.slice(1);
+
             $.ajax({
                 url: url,
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
                 success: response => {
-                    alert(response.success ? `${entity.charAt(0).toUpperCase() + entity.slice(1)} updated successfully!` : `Failed to update ${entity}: ${response.message}`);
+                    showInfoModal(
+                        response.success ? 'Success' : 'Error',
+                        response.message || (response.success ? `${entityName} updated successfully!` : `Failed to update ${entityName}.`),
+                        response.success
+                    );
                     if (response.success) {
-                        modal.modal('hide');
+                        const currentModal = bootstrap.Modal.getInstance(modalElement[0]);
+                        if(currentModal) currentModal.hide();
                         reloadFn();
                     }
                 },
-                error: (xhr, status, error) => alert(`Failed to update ${entity}: ${error}`)
+                error: (xhr, status, error) => {
+                    showInfoModal(
+                        'Error',
+                        `Failed to update ${entityName}. Server error: ${error}`,
+                        false
+                    );
+                }
             });
         });
     }
@@ -161,7 +335,6 @@ $(document).ready(function () {
         target: '#invoice-list',
         entity: 'invoice',
         fields: ['Invoice ID', 'Customer Name', 'Total Price', 'Created At'],
-        // Không cần modal cho invoice vì không có chức năng edit
         modalId: '',
         page: 1,
         limit: parseInt($('#invoiceLimit').val())
@@ -191,14 +364,53 @@ $(document).ready(function () {
         loadList(invoiceConfig);
     });
 
-    // Modal thêm mới cho các entity (Invoice không cần edit nên chỉ load modal add nếu cần)
-    ['User', 'Model', 'Invoice'].forEach(entity => {
-        $(`#add${entity}Modal`).on('show.bs.modal', function () {
-            $(this).find('.modal-body').load(`../admin/add_${entity.toLowerCase()}_form.php`);
+    // Modal thêm mới cho các entity (Load form vào modal body)
+    ['User', 'Model'].forEach(entity => {
+        const modalId = `#add${entity}Modal`;
+        $(modalId).on('show.bs.modal', function () {
+            $(this).find('.modal-body').load(`../admin/add_${entity.toLowerCase()}_form.php`, function() {
+                const addForm = $(`${modalId} form`);
+                if (addForm.length) {
+                    const addUrl = `../admin/add_${entity.toLowerCase()}.php`;
+                    const reloadListConfig = entity === 'User' ? userConfig : modelConfig;
+
+                    addForm.off('submit').on('submit', function(e) {
+                        e.preventDefault();
+                        const formData = $(this).serialize();
+                        const entityName = entity.charAt(0).toUpperCase() + entity.slice(1);
+
+                        $.ajax({
+                            url: addUrl,
+                            type: 'POST',
+                            data: formData,
+                            dataType: 'json',
+                            success: response => {
+                                showInfoModal(
+                                    response.success ? 'Success' : 'Error',
+                                    response.message || (response.success ? `${entityName} added successfully!` : `Failed to add ${entityName}.`),
+                                    response.success
+                                );
+                                if (response.success) {
+                                    const currentModal = bootstrap.Modal.getInstance($(modalId)[0]);
+                                    if(currentModal) currentModal.hide();
+                                    loadList(reloadListConfig);
+                                }
+                            },
+                            error: (xhr, status, error) => {
+                                showInfoModal(
+                                    'Error',
+                                    `Failed to add ${entityName}. Server error: ${error}`,
+                                    false
+                                );
+                            }
+                        });
+                    });
+                }
+            });
         });
     });
 
-    // Lưu chỉnh sửa cho user và model (không có cho invoice)
+    // Gọi hàm saveEdit cho User và Model (Gắn sự kiện cho nút save trong edit modals)
     saveEdit({
         modalId: 'editUserModal',
         entity: 'user',
@@ -216,10 +428,24 @@ $(document).ready(function () {
     });
 
     // Toggle password (nếu có)
-    $('.togglePassword').on('click', function () {
+    $(document).on('click', '.togglePassword', function () { 
         const input = $(this).prev('input');
         const icon = $(this).find('i');
         input.attr('type', input.attr('type') === 'password' ? 'text' : 'password');
         icon.toggleClass('bi-eye bi-eye-slash');
     });
+
+    // Hàm escape HTML để tránh XSS
+    function escapeHtml(text) {
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        if (text == null) return ''; 
+        text = String(text); 
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
 });

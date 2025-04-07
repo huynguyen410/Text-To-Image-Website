@@ -1,0 +1,40 @@
+/* css/admin_style.css */
+body {
+  /* Đảm bảo font chữ nhất quán */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+}
+
+#adminSidebar {
+  background-color: #212529; /* Dark background */
+  min-height: calc(100vh - 56px); /* Full height minus navbar height (adjust 56px if needed) */
+}
+
+#adminSidebar .nav-link {
+  color: rgba(255, 255, 255, 0.7); /* Light text color */
+  padding: 0.75rem 1rem;
+  border-left: 3px solid transparent; /* For active state indicator */
+}
+
+#adminSidebar .nav-link:hover,
+#adminSidebar .nav-link:focus { /* Added focus state for accessibility */
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  outline: none; /* Remove default focus outline if adding custom */
+}
+
+#adminSidebar .nav-link.active {
+  color: #fff; /* White text for active */
+  font-weight: bold; 
+  background-color: transparent; /* Remove blue background */
+  border-left-color: transparent; /* Remove white border */
+}
+
+#adminSidebar .nav-link i {
+    width: 20px; /* Align icons */
+    text-align: center;
+}
+
+/* Đảm bảo nội dung không bị footer che */
+main {
+    padding-bottom: 2rem; /* Add some space above the footer */
+}

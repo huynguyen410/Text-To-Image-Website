@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const showLoginFormButton = document.getElementById('show-login-form');
     const showRegisterFormButton = document.getElementById('show-register-form');
     const historyLink = document.getElementById('history-link');
+    const userDropdown = document.getElementById('user-dropdown');
+    const historyItem = document.getElementById('history-item');
 
     // Hàm hiển thị form đăng nhập
     const showLoginForm = () => {
@@ -34,20 +36,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Hàm hiển thị thông tin người dùng và nút đăng xuất
     const showLogout = (username) => {
-        loginRegisterLink.style.display = 'none';
-        logoutLink.style.display = 'block';
-        historyLink.style.display = 'block';
-        usernameDisplay.style.display = 'block';
-        usernameDisplay.textContent = `Logged in as: ${username}`;
+        // Lấy element ngay trước khi sử dụng
+        const loginRegisterLink = document.getElementById('login-register-link');
+        const userDropdown = document.getElementById('user-dropdown');
+        const historyItem = document.getElementById('history-item');
+        const usernameDisplay = document.getElementById('username-display');
+
+        if (loginRegisterLink) loginRegisterLink.style.display = 'none';
+        if (userDropdown) userDropdown.style.display = 'block';
+        if (historyItem) historyItem.style.display = 'block';
+        if (usernameDisplay) {
+            usernameDisplay.style.display = 'inline';
+            usernameDisplay.textContent = username;
+        }
     };
 
     // Hàm ẩn thông tin người dùng và nút đăng xuất
     const hideLogout = () => {
-        loginRegisterLink.style.display = 'block';
-        logoutLink.style.display = 'none';
-        historyLink.style.display = 'none';
-        usernameDisplay.style.display = 'none';
-        usernameDisplay.textContent = '';
+        // Lấy element ngay trước khi sử dụng
+        const loginRegisterLink = document.getElementById('login-register-link');
+        const userDropdown = document.getElementById('user-dropdown');
+        const historyItem = document.getElementById('history-item');
+        const usernameDisplay = document.getElementById('username-display');
+
+        if (loginRegisterLink) loginRegisterLink.style.display = 'block';
+        if (userDropdown) userDropdown.style.display = 'none';
+        if (historyItem) historyItem.style.display = 'none';
+        if (usernameDisplay) {
+            usernameDisplay.style.display = 'none';
+            usernameDisplay.textContent = '';
+        }
     };
 
     // Hàm hiển thị modal thông báo

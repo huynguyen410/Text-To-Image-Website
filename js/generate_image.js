@@ -23,12 +23,14 @@ if(premiumBtn){
     });
 }
 
+// Thêm biến để lưu dữ liệu model động
+let modelDataMap = {}; // Map model_id to { group_id, name }
+
+// Thêm biến để tham chiếu đến container chứa kết quả của các model
+const modelResultsContainer = document.getElementById("model-results"); // Đảm bảo thẻ này tồn tại trong HTML
+
 // Store generated images by model
-let generatedImages = {
-  "stabilityai/stable-diffusion-3.5-large": [],
-  "black-forest-labs/FLUX.1-dev": [],
-  "strangerzonehf/Flux-Midjourney-Mix2-LoRA": []
-};
+let generatedImages = {}; // Khởi tạo rỗng, sẽ được điền động
 
 if(formatSelect){
     formatSelect.addEventListener("change", handleFormatChange);
@@ -199,28 +201,118 @@ const generateSingleImage = async (modelId, prompt, style, variation = 0, maxRet
   return blob;
 };
 
+// Hàm để lấy danh sách model từ backend
+const fetchModels = async () => {
+  try {
+    // Sửa đường dẫn fetch thành đường dẫn tuyệt đối từ gốc web
+    const response = await fetch('/Text-To-Image-Website/src/get_models.php');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const models = await response.json();
+
+    modelDataMap = {}; // Reset map
+    models.forEach(model => {
+      // Tạo group_id an toàn từ model_id hoặc name nếu cần
+      // Ví dụ đơn giản: thay thế ký tự không hợp lệ bằng '-' và chuyển thành chữ thường
+      // Bạn có thể cần logic phức tạp hơn tùy theo định dạng model_id/name
+      const groupId = (model.group_id || model.model_id || model.name)
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\-_]/g, '-')
+                        .replace(/-+/g, '-'); // Đảm bảo group_id hợp lệ cho CSS ID
+
+      modelDataMap[model.model_id] = {
+        group_id: groupId,
+        name: model.name || model.model_id // Dùng name hoặc model_id nếu name không có
+      };
+    });
+    // console.log("Models loaded:", modelDataMap);
+    // Có thể bật lại nút Generate ở đây nếu bạn đã vô hiệu hóa nó ban đầu
+    if(generateBtn) generateBtn.disabled = false;
+
+  } catch (error) {
+    console.error("Error fetching models:", error);
+    showAlert("Không thể tải danh sách model. Một số chức năng có thể không hoạt động.", "danger");
+    // Vô hiệu hóa nút Generate nếu không tải được model
+    if(generateBtn) generateBtn.disabled = true;
+  }
+};
+
+// Hàm đảm bảo HTML group cho model tồn tại
+const ensureModelGroupExists = (groupId, modelName) => {
+  if (!modelResultsContainer) {
+      console.error("Container #model-results không tồn tại trong DOM.");
+      return false; // Thoát nếu container chính không tồn tại
+  }
+  const groupElementId = `${groupId}-group`;
+  let groupElement = document.getElementById(groupElementId);
+
+  if (!groupElement) {
+    // console.log(`Creating group element for ${modelName} with ID: ${groupElementId}`);
+    groupElement = document.createElement("div");
+    groupElement.className = "model-group";
+    groupElement.id = groupElementId;
+    groupElement.style.display = "none"; // Ẩn ban đầu
+
+    const titleElement = document.createElement("h3");
+    // Sử dụng modelName lấy từ map, hoặc groupId nếu name không có
+    titleElement.textContent = `${modelName || groupId} Results`;
+
+    const containerElement = document.createElement("div");
+    containerElement.className = "img_container";
+    containerElement.id = `${groupId}-container`;
+
+    groupElement.appendChild(titleElement);
+    groupElement.appendChild(containerElement);
+
+    // Thêm vào container chính
+    modelResultsContainer.appendChild(groupElement);
+  }
+  return true; // Trả về true nếu group tồn tại hoặc được tạo thành công
+};
+
 const generateAiImages = async (prompt, style, quantity, selectedModels) => {
   try {
-    generatedImages = {};
-    selectedModels.forEach(model => {
-      generatedImages[model] = [];
+    generatedImages = {}; // Reset generated images object
+
+    // Khởi tạo mảng rỗng cho các model được chọn
+    selectedModels.forEach(modelId => {
+       if (modelDataMap[modelId]) { // Chỉ khởi tạo cho model hợp lệ đã load
+         generatedImages[modelId] = [];
+       }
     });
 
-    for (const model of selectedModels) {
+    // Tạo ảnh tuần tự cho từng model (bạn có thể tối ưu chạy song song nếu muốn)
+    for (const modelId of selectedModels) {
+        // Bỏ qua nếu model không có trong dữ liệu đã load (phòng trường hợp lỗi)
+        if (!modelDataMap[modelId]) {
+            console.warn(`Model ${modelId} không có trong dữ liệu đã tải, bỏ qua tạo ảnh.`);
+            continue;
+        }
+
       for (let i = 0; i < quantity; i++) {
-        const blob = await generateSingleImage(model, prompt, style, i); // Truyền i làm variation
+        const blob = await generateSingleImage(modelId, prompt, style, i); // Truyền i làm variation
         if (blob) {
           const url = URL.createObjectURL(blob);
-          generatedImages[model].push({ url, blob });
-          updateImageContainer(selectedModels);
+           // Đảm bảo mảng tồn tại trước khi push
+           if (!generatedImages[modelId]) {
+               generatedImages[modelId] = [];
+           }
+          generatedImages[modelId].push({ url, blob });
+          updateImageContainer(selectedModels); // Cập nhật UI sau mỗi ảnh
 
           const blobSize = blob.size / 1024;
-          saveImageToHistory(prompt, style, url, blobSize, model);
+          // Cần đảm bảo modelId tồn tại trong DB trước khi lưu lsử
+          saveImageToHistory(prompt, style, url, blobSize, modelId);
+        } else {
+            // Có thể thêm xử lý nếu generateSingleImage trả về null (thất bại)
+            console.warn(`Không thể tạo ảnh thứ ${i+1} cho model ${modelId}`);
         }
       }
     }
   } catch (error) {
-    showAlert("Có lỗi xảy ra khi tạo ảnh. Vui lòng thử lại sau.", "danger");
+    showAlert(`Có lỗi xảy ra khi tạo ảnh: ${error.message}`, "danger");
+    console.error("Error during image generation process:", error);
   } finally {
     isImageGenerating = false;
     if(generateBtn){
@@ -262,15 +354,14 @@ const escapeCSSSelector = (id) => {
   return id.replace(/([:./[\]])/g, '\\$1');
 };
 
-// Ánh xạ từ model_id sang group_id (dựa trên models.name)
-const modelIdToGroupId = {
-  "stabilityai/stable-diffusion-3.5-large": "stable-diffusion-3.5",
-  "black-forest-labs/FLUX.1-dev": "flux1",
-  "strangerzonehf/Flux-Midjourney-Mix2-LoRA": "flux-midjourney"
-};
-
 const handleImageGeneration = (e) => {
   e.preventDefault();
+  // Kiểm tra xem modelData đã load chưa
+  if (Object.keys(modelDataMap).length === 0 && generateBtn && generateBtn.disabled) {
+       showAlert("Danh sách model chưa được tải xong. Vui lòng đợi hoặc thử tải lại trang.", "warning");
+       return;
+  }
+
   getCurrentUserInfo().then(userInfo => {
     if (!userInfo.success) {
       showAlert("Bạn phải đăng nhập để tạo ảnh.", "danger");
@@ -294,18 +385,31 @@ const handleImageGeneration = (e) => {
       const userStyle = document.querySelector(".style_select").value;
       const userImgQuantity = parseInt(document.querySelector(".img_quantity").value);
       const selectedModels = Array.from(document.querySelectorAll('input[name="model[]"]:checked')).map(cb => cb.value);
+
       if (selectedModels.length === 0) {
         showAlert("Vui lòng chọn ít nhất 1 mô hình.", "warning");
         return;
       }
+
+      // Lọc ra các model không hợp lệ (không có trong map đã load)
+      const validSelectedModels = selectedModels.filter(modelId => {
+          if (!modelDataMap[modelId]) {
+              console.warn(`Model được chọn ${modelId} không hợp lệ hoặc chưa được tải. Bỏ qua.`);
+              return false;
+          }
+          return true;
+      });
+
+      if (validSelectedModels.length === 0) {
+          showAlert("Không có model hợp lệ nào được chọn hoặc danh sách model chưa tải xong.", "warning");
+          return; // Dừng nếu không có model hợp lệ nào
+      }
+
       if(generateBtn){
           generateBtn.setAttribute("disabled", true);
           generateBtn.innerText = "Generating";
       }
       isImageGenerating = true;
-
-      // Debug: Log các checkbox để kiểm tra
-      // console.log("Checkbox được chọn:", document.querySelectorAll('input[name="model[]"]:checked'));
 
       // Ẩn container mặc định nếu có
       const defaultImages = document.querySelector("#default-images");
@@ -314,68 +418,95 @@ const handleImageGeneration = (e) => {
       }
 
       // Hiển thị loader cho các container tương ứng với mô hình được chọn
-      selectedModels.forEach(modelId => {
-        const groupId = modelIdToGroupId[modelId]; // Lấy group_id từ ánh xạ
-        const escapedGroupId = escapeCSSSelector(groupId); // Thoát ký tự đặc biệt
-        const group = document.querySelector(`#${escapedGroupId}-group`);
-        if (group) {
-          group.style.display = "flex";
-          const container = document.querySelector(`#${escapedGroupId}-container`);
-          if (container) {
-            container.innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>';
-          } else {
-            console.warn(`Không tìm thấy container với ID: #${escapedGroupId}-container`);
-          }
+      validSelectedModels.forEach(modelId => {
+        const modelInfo = modelDataMap[modelId];
+        // Đảm bảo HTML group tồn tại TRƯỚC KHI tìm kiếm và hiển thị loader
+        if (ensureModelGroupExists(modelInfo.group_id, modelInfo.name)) {
+            const escapedGroupId = escapeCSSSelector(modelInfo.group_id);
+            const group = document.querySelector(`#${escapedGroupId}-group`);
+            if (group) {
+              group.style.display = "flex"; // Hiển thị group
+              const container = group.querySelector(`#${escapedGroupId}-container`);
+              if (container) {
+                container.innerHTML = '<div class="img_card loading"><img src="../images/loader.svg" alt="Loading"></div>'; // Hiển thị loader
+              } else {
+                console.warn(`Không tìm thấy container #${escapedGroupId}-container bên trong group #${escapedGroupId}-group`);
+              }
+            } else {
+                 console.warn(`Không tìm thấy group #${escapedGroupId}-group mặc dù ensureModelGroupExists trả về true?`);
+            }
         } else {
-          // console.warn(`Không tìm thấy nhóm với ID: #${escapedGroupId}-group`);
-          // console.log("Các nhóm hiện có trong DOM:", document.querySelectorAll(".model-group"));
+             console.error(`Không thể tạo hoặc tìm group cho ${modelId}`);
         }
+
       });
 
-      // Gọi hàm tạo ảnh
-      generateAiImages(userPrompt, userStyle, userImgQuantity, selectedModels);
+      // Gọi hàm tạo ảnh với danh sách model đã được kiểm tra hợp lệ
+      generateAiImages(userPrompt, userStyle, userImgQuantity, validSelectedModels);
     });
   });
 };
 
 const updateImageContainer = (selectedModels) => {
   const defaultImages = document.querySelector("#default-images");
-  const modelResults = document.querySelector("#model-results");
+  // const modelResults = document.querySelector("#model-results"); // Đã có biến toàn cục modelResultsContainer
 
   // Ẩn container mặc định nếu có
   if (defaultImages) {
     defaultImages.style.display = "none";
   }
 
-  // Duyệt qua tất cả các model-group hiện có và ẩn chúng
-  const allModelGroups = document.querySelectorAll(".model-group");
-  allModelGroups.forEach(group => {
-    group.style.display = "none";
-    const container = group.querySelector(".img_container");
-    if (container) container.innerHTML = ""; // Xóa nội dung cũ
-  });
+  // Ẩn tất cả các model-group hiện có và xóa nội dung cũ
+  if (modelResultsContainer) {
+      const allModelGroups = modelResultsContainer.querySelectorAll(".model-group");
+      allModelGroups.forEach(group => {
+        group.style.display = "none"; // Ẩn group đi
+        const container = group.querySelector(".img_container");
+        if (container) container.innerHTML = ""; // Xóa nội dung ảnh cũ
+      });
+  } else {
+       console.error("#model-results container not found during update.");
+       return; // Không thể tiếp tục nếu container chính không có
+  }
 
-  // Hiển thị và cập nhật các container cho các mô hình được chọn
+
+  // Hiển thị và cập nhật các container cho các mô hình được chọn *và hợp lệ*
   selectedModels.forEach(modelId => {
-    const groupId = modelIdToGroupId[modelId]; // Lấy group_id từ ánh xạ
-    const escapedGroupId = escapeCSSSelector(groupId); // Thoát ký tự đặc biệt
-    const group = document.querySelector(`#${escapedGroupId}-group`);
-    
-    if (group) {
-      group.style.display = "flex"; // Hiển thị container
-      const container = document.querySelector(`#${escapedGroupId}-container`);
-      if (container) {
-        container.innerHTML = ""; // Xóa nội dung cũ
-        generatedImages[modelId].forEach((imgObject, index) => {
-          const imgCard = createImageCard(imgObject.url, index);
-          container.appendChild(imgCard);
-        });
-      } else {
-        console.warn(`Không tìm thấy container với ID: #${escapedGroupId}-container`);
-      }
-    } else {
-      console.warn(`Không tìm thấy nhóm với ID: #${escapedGroupId}-group`);
-    }
+     const modelInfo = modelDataMap[modelId];
+     // Chỉ xử lý nếu model này có trong dữ liệu đã load
+     if (modelInfo) {
+         // Đảm bảo HTML group tồn tại trước khi hiển thị
+         if (ensureModelGroupExists(modelInfo.group_id, modelInfo.name)) {
+            const escapedGroupId = escapeCSSSelector(modelInfo.group_id);
+            const group = document.querySelector(`#${escapedGroupId}-group`);
+
+            if (group) {
+                group.style.display = "flex"; // Hiển thị group này
+                const container = group.querySelector(`#${escapedGroupId}-container`);
+                if (container) {
+                    container.innerHTML = ""; // Xóa loader hoặc ảnh cũ (nếu có)
+                    // Chỉ thêm ảnh nếu có dữ liệu ảnh cho model này
+                    if (generatedImages[modelId] && generatedImages[modelId].length > 0) {
+                        generatedImages[modelId].forEach((imgObject, index) => {
+                            const imgCard = createImageCard(imgObject.url, index);
+                            container.appendChild(imgCard);
+                        });
+                    } else {
+                        // Có thể hiển thị thông báo "Chưa có ảnh" nếu muốn
+                        // container.innerHTML = "<p>Chưa có ảnh được tạo cho model này.</p>";
+                    }
+                } else {
+                   console.warn(`Không tìm thấy container #${escapedGroupId}-container khi cập nhật ảnh.`);
+                }
+            } else {
+                 console.warn(`Không tìm thấy group #${escapedGroupId}-group khi cập nhật ảnh.`);
+            }
+         } else {
+              console.error(`Không thể tạo/tìm group cho ${modelId} khi cập nhật ảnh.`);
+         }
+     } else {
+         console.warn(`Model ${modelId} không có trong modelDataMap khi cập nhật container.`);
+     }
   });
 };
 
@@ -477,18 +608,22 @@ if(generateFromDetailsBtn){
 
 // Đảm bảo các event listener khác (như confirmPremiumBtn) không gây xung đột
 document.addEventListener("DOMContentLoaded", () => {
+  // Vô hiệu hóa nút Generate ban đầu cho đến khi model được tải
+  if(generateBtn) generateBtn.disabled = true;
+
   showDefaultImages();
   updateQuotaDisplay();
-});
-document.addEventListener('DOMContentLoaded', () => {
-  const premiumBtn = document.getElementById("premiumBtn");
-  // console.log("premiumBtn:", premiumBtn);
-  if (premiumBtn) {
-    premiumBtn.addEventListener("click", function() {
-      console.log("premiumBtn clicked");
-      // Các xử lý khác...
-    });
-  } else {
-    console.error("Không tìm thấy phần tử có id 'premiumBtn'");
-  }
+  fetchModels(); // Gọi hàm tải models khi DOM sẵn sàng
+
+  // Các event listener khác có thể đặt ở đây
+    const premiumBtn = document.getElementById("premiumBtn");
+    if (premiumBtn) {
+        premiumBtn.addEventListener("click", function() {
+        console.log("premiumBtn clicked");
+        // Các xử lý khác...
+        });
+    } else {
+        // console.error("Không tìm thấy phần tử có id 'premiumBtn' trong DOMContentLoaded");
+        // Gỡ bỏ lỗi này vì nó có thể không cần thiết nếu trang không có nút premium
+    }
 });

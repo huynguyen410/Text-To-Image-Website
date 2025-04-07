@@ -23,28 +23,3 @@
         <button type="submit" class="btn btn-primary">Add User</button>
     </div>
 </form>
-<script>
-$(document).ready(function() {
-    $('#add_user_form').submit(function(event) {
-        event.preventDefault();
-        $.ajax({
-            url: 'add_user.php',
-            type: 'POST',
-            data: $(this).serialize(),
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    alert('User added successfully!');
-                    $('#addUserModal').modal('hide');
-                    loadUsers(); 
-                } else {
-                    alert('Failed to add user: ' + response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('Failed to add user: ' + error);
-            }
-        });
-    });
-});
-</script>

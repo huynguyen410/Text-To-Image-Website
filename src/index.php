@@ -45,36 +45,36 @@
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="premiumModalLabel">Thanh toán Premium</h5>
+              <h5 class="modal-title" id="premiumModalLabel">Upgrade to Premium</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <!-- Phần chọn gói Premium -->
-              <h6 class="mb-3">Chọn gói Premium của bạn</h6>
+              <h6 class="mb-3">Choose your Premium package</h6>
               <div class="btn-group d-flex" role="group" aria-label="Premium Packages">
                 <input type="radio" class="btn-check" name="package" id="package1" autocomplete="off" value="1" checked>
-                <label class="btn btn-outline-primary flex-fill" for="package1">1 Tháng</label>
+                <label class="btn btn-outline-primary flex-fill" for="package1">1 Month</label>
 
                 <input type="radio" class="btn-check" name="package" id="package3" autocomplete="off" value="3">
-                <label class="btn btn-outline-primary flex-fill" for="package3">3 Tháng</label>
+                <label class="btn btn-outline-primary flex-fill" for="package3">3 Months</label>
 
                 <input type="radio" class="btn-check" name="package" id="package6" autocomplete="off" value="6">
-                <label class="btn btn-outline-primary flex-fill" for="package6">6 Tháng</label>
+                <label class="btn btn-outline-primary flex-fill" for="package6">6 Months</label>
 
                 <input type="radio" class="btn-check" name="package" id="package12" autocomplete="off" value="12">
-                <label class="btn btn-outline-primary flex-fill" for="package12">1 Năm</label>
+                <label class="btn btn-outline-primary flex-fill" for="package12">1 Year</label>
               </div>
               <!-- Nút hiển thị thông tin thanh toán -->
               <div class="mt-4">
-                <button id="showPaymentInfoBtn" class="btn btn-info">Xem thông tin thanh toán</button>
+                <button id="showPaymentInfoBtn" class="btn btn-info">Show payment information</button>
               </div>
               <!-- Phần hiển thị thông tin thanh toán (ẩn mặc định) -->
               <div id="paymentInfo" class="mt-3" style="display: none;">
-                <!-- Nội dung thanh toán sẽ được cập nhật bởi JavaScript -->
+                <!-- Payment content will be updated by JavaScript -->
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-success" id="confirmPremiumBtn">Đã chuyển khoản</button>
+              <button type="button" class="btn btn-success" id="confirmPremiumBtn">Confirm Payment</button>
             </div>
           </div>
         </div>
@@ -189,6 +189,89 @@
         </div>
       </section>
 
+      <!-- Additional Information Section -->
+      <section class="info_section bg-body-tertiary container-fluid py-5">
+          <div class="container">
+              <div class="row justify-content-center">
+                  <div class="col-lg-10 text-center">
+                      <h2 class="mb-4">Explore the Power of AI Image Generation</h2>
+                      <p class="lead mb-4">
+                          Unleash your creativity with our advanced AI models. Simply enter a description, choose your preferred style and model, and watch your ideas come to life with stunning detail. Whether you're a professional artist, designer, or just exploring, our platform provides the tools you need to create unique and captivating images.
+                      </p>
+                      <div class="row">
+                          <div class="col-md-4 mb-3">
+                              <div class="card h-100 shadow-sm border-light">
+                                  <div class="card-body">
+                                      <i class="bi bi-stars fs-2 text-primary mb-3 d-block"></i>
+                                      <h5 class="card-title">Diverse Models</h5>
+                                      <p class="card-text">Experiment with various cutting-edge AI models, each offering a unique artistic interpretation of your prompts.</p>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-md-4 mb-3">
+                              <div class="card h-100 shadow-sm border-light">
+                                  <div class="card-body">
+                                      <i class="bi bi-palette-fill fs-2 text-success mb-3 d-block"></i>
+                                      <h5 class="card-title">Rich Styles</h5>
+                                      <p class="card-text">From realistic to anime and abstract art, select the perfect style that matches your vision.</p>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-md-4 mb-3">
+                              <div class="card h-100 shadow-sm border-light">
+                                  <div class="card-body">
+                                      <i class="bi bi-download fs-2 text-info mb-3 d-block"></i>
+                                      <h5 class="card-title">Easy Downloads</h5>
+                                      <p class="card-text">Quickly download your generated images in various formats like JPG, PNG, or WEBP with just a click.</p>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+                      <hr class="my-5">
+
+                      <div class="row justify-content-center mt-4">
+                          <div class="col-lg-8 text-center">
+                              <h3 class="mb-4">How it Works - It's Simple</h3>
+                          </div>
+                      </div>
+                      <div class="row text-center">
+                          <div class="col-md-4 mb-3">
+                              <div class="card border-0 bg-transparent">
+                                  <div class="card-body">
+                                      <span class="badge bg-primary rounded-pill fs-4 mb-3 px-3">1</span>
+                                      <h5 class="card-title mt-2">Enter Description</h5>
+                                      <p class="card-text text-muted">Write a detailed description of the image you want to create.</p>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-md-4 mb-3">
+                              <div class="card border-0 bg-transparent">
+                                  <div class="card-body">
+                                      <span class="badge bg-primary rounded-pill fs-4 mb-3 px-3">2</span>
+                                      <h5 class="card-title mt-2">Select Options</h5>
+                                      <p class="card-text text-muted">Choose the AI model, style, and number of images you desire.</p>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-md-4 mb-3">
+                              <div class="card border-0 bg-transparent">
+                                  <div class="card-body">
+                                       <span class="badge bg-primary rounded-pill fs-4 mb-3 px-3">3</span>
+                                      <h5 class="card-title mt-2">Generate & Download</h5>
+                                      <p class="card-text text-muted">Click "Generate" and download your amazing creations!</p>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                       <!-- Tùy chọn: Nút kêu gọi hành động -->
+                       <!-- <a href="#" class="btn btn-lg btn-primary mt-4 generate_btn">Bắt đầu Sáng tạo Ngay!</a> -->
+                  </div>
+              </div>
+          </div>
+      </section>
+      <!-- End Additional Information Section -->
+
       <!-- Detailed Prompt Modal -->
       <div class="modal fade" id="detailedPromptModal" tabindex="-1" aria-labelledby="detailedPromptModalLabel"
            data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-modal="true" inert>
@@ -271,11 +354,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-light text-center py-3">
+    <footer class="bg-light text-center py-3 border-top">
       <div class="container">
         <p class="text-muted">© 2025 AI Image Generator</p>
         <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging Face</a> |
-        <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại học Sài Gòn</a>
+        <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Saigon University</a>
       </div>
     </footer>
   </div>

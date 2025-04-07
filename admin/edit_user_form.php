@@ -35,8 +35,12 @@ if ($row = mysqli_fetch_assoc($result)) {
             <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($row['email']); ?>">
         </div>
         <div class="mb-3">
-            <label for="password" class="form-label">Password (leave blank to keep unchanged)</label>
+            <label for="password" class="form-label">New Password (Optional)</label>
             <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password">
+        </div>
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
         </div>
     </form>
     <?php

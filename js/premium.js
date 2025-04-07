@@ -258,7 +258,7 @@ function initApp() {
           loginModal.show();
           showAlert("Vui lòng đăng nhập để đăng ký Premium", "warning");
         } else if (userInfo.user.isPremium === "yes") {
-          showAlert("Tài khoản của bạn đã là Premium", "warning");
+          showAlert("Your account is already Premium.", "warning");
         } else {
           const premiumModalElement = document.getElementById("premiumModal");
           const premiumModal = new bootstrap.Modal(premiumModalElement);
@@ -318,17 +318,17 @@ function initApp() {
           </td>
         </tr>
         <tr>
-          <td class="text-center">Giá: ${price}</td>
+          <td class="text-center">Price: ${price}</td>
         </tr>
         <tr>
           <td class="text-center">
-            Tên ngân hàng: Timo Bank<br>
-            Số tài khoản: 9021848957816<br>
-            Tên chủ tài khoản: Nguyen Huu Duc
+            Bank Name: Timo Bank<br>
+            Account Number: 9021848957816<br>
+            Account Holder: Nguyen Huu Duc
           </td>
         </tr>
         <tr>
-          <td class="text-center">Nội dung chuyển khoản: ${window.expectedTransferContent}</td>
+          <td class="text-center">Transfer Content: ${window.expectedTransferContent}</td>
         </tr>
       </table>
     `;

@@ -29,36 +29,36 @@
                 <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                    <h5 class="modal-title" id="premiumModalLabel">Thanh toán Premium</h5>
+                    <h5 class="modal-title" id="premiumModalLabel">Upgrade to Premium</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                     <!-- Phần chọn gói Premium -->
-                    <h6 class="mb-3">Chọn gói Premium của bạn</h6>
+                    <h6 class="mb-3">Choose your Premium package</h6>
                     <div class="btn-group d-flex" role="group" aria-label="Premium Packages">
                         <input type="radio" class="btn-check" name="package" id="package1" autocomplete="off" value="1" checked>
-                        <label class="btn btn-outline-primary flex-fill" for="package1">1 Tháng</label>
+                        <label class="btn btn-outline-primary flex-fill" for="package1">1 Month</label>
 
                         <input type="radio" class="btn-check" name="package" id="package3" autocomplete="off" value="3">
-                        <label class="btn btn-outline-primary flex-fill" for="package3">3 Tháng</label>
+                        <label class="btn btn-outline-primary flex-fill" for="package3">3 Months</label>
 
                         <input type="radio" class="btn-check" name="package" id="package6" autocomplete="off" value="6">
-                        <label class="btn btn-outline-primary flex-fill" for="package6">6 Tháng</label>
+                        <label class="btn btn-outline-primary flex-fill" for="package6">6 Months</label>
 
                         <input type="radio" class="btn-check" name="package" id="package12" autocomplete="off" value="12">
-                        <label class="btn btn-outline-primary flex-fill" for="package12">1 Năm</label>
+                        <label class="btn btn-outline-primary flex-fill" for="package12">1 Year</label>
                     </div>
                     <!-- Nút hiển thị thông tin thanh toán -->
                     <div class="mt-4">
-                        <button id="showPaymentInfoBtn" class="btn btn-info">Xem thông tin thanh toán</button>
+                        <button id="showPaymentInfoBtn" class="btn btn-info">Show payment information</button>
                     </div>
                     <!-- Phần hiển thị thông tin thanh toán (ẩn mặc định) -->
                     <div id="paymentInfo" class="mt-3" style="display: none;">
-                        <!-- Nội dung thanh toán sẽ được cập nhật bởi JavaScript -->
+                        <!-- Payment content will be updated by JavaScript -->
                     </div>
                     </div>
                     <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="confirmPremiumBtn">Đã chuyển khoản</button>
+                    <button type="button" class="btn btn-success" id="confirmPremiumBtn">Confirm Payment</button>
                     </div>
                 </div>
                 </div>
@@ -69,14 +69,14 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="notificationModalLabel">Thông Báo</h5>
+                            <h5 class="modal-title" id="notificationModalLabel">Notification</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body" id="notificationModalBody">
-                            <!-- Nội dung thông báo sẽ được chèn vào đây -->
+                            <!-- Notification content will be inserted here -->
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -111,7 +111,7 @@
         <div class="container">
             <p class="text-muted">© 2025 AI Image Generator</p>
             <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging Face</a> |
-            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Đại học Sài Gòn</a>
+            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Saigon University</a>
         </div>
     </footer>
 </body>
