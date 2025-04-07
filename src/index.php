@@ -111,7 +111,7 @@
       </div>
 
       <!-- Image Generator Section -->
-      <section class="image_generator">
+      <section id="image_generator" class="image_generator">
         <div class="content">
           <h1>AI Image Generator</h1>
           <p>Turn Your Imagination into Stunning Visuals in Seconds!</p>
@@ -272,6 +272,56 @@
       </section>
       <!-- End Additional Information Section -->
 
+      <!-- Community Gallery Section -->
+      <section id="community-gallery" class="community-gallery py-5 bg-light">
+          <div class="container">
+              <h2 class="text-center mb-5">Community Gallery Showcase</h2>
+              <div class="row gy-4 justify-content-center">
+                  <!-- Image 1 -->
+                  <div class="col-lg-4 col-md-6">
+                      <div class="gallery-item shadow-sm rounded overflow-hidden">
+                          <img src="..\images\67d944cbc50f1.jpg" class="img-fluid" alt="Community Image 1">
+                      </div>
+                  </div>
+                  <!-- Image 2 -->
+                  <div class="col-lg-4 col-md-6">
+                       <div class="gallery-item shadow-sm rounded overflow-hidden">
+                          <img src="..\images\67d943eacb1dc.jpg" class="img-fluid" alt="Community Image 2">
+                      </div>
+                  </div>
+                  <!-- Image 3 -->
+                  <div class="col-lg-4 col-md-6">
+                       <div class="gallery-item shadow-sm rounded overflow-hidden">
+                          <img src="..\images\67d84daa8d8ba.jpg" class="img-fluid" alt="Community Image 3">
+                      </div>
+                  </div>
+                  <!-- Image 4 -->
+                  <div class="col-lg-4 col-md-6">
+                       <div class="gallery-item shadow-sm rounded overflow-hidden">
+                          <img src="..\images\67d84d055ece0.jpg" class="img-fluid" alt="Community Image 4">
+                      </div>
+                  </div>
+                  <!-- Image 5 -->
+                  <div class="col-lg-4 col-md-6">
+                       <div class="gallery-item shadow-sm rounded overflow-hidden">
+                          <img src="..\images\67d9441b99609.jpg" class="img-fluid" alt="Community Image 5">
+                      </div>
+                  </div>
+                  <!-- Image 6 -->
+                  <div class="col-lg-4 col-md-6">
+                       <div class="gallery-item shadow-sm rounded overflow-hidden">
+                          <img src="..\images\67d84d063afb9.jpg" class="img-fluid" alt="Community Image 6">
+                      </div>
+                  </div>
+              </div>
+              <!-- Optional: Button to try creat images -->
+              <div class="text-center mt-5">
+                   <a href="#image_generator" class="btn btn-primary">Try Image Creation Now</a> 
+              </div>
+          </div>
+      </section>
+      <!-- End Community Gallery Section -->
+
       <!-- Detailed Prompt Modal -->
       <div class="modal fade" id="detailedPromptModal" tabindex="-1" aria-labelledby="detailedPromptModalLabel"
            data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-modal="true" inert>
@@ -354,11 +404,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-light text-center py-3 border-top">
+    <footer class="bg-dark text-white text-center py-3 border-top border-secondary">
       <div class="container">
-        <p class="text-muted">© 2025 AI Image Generator</p>
-        <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging Face</a> |
-        <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Saigon University</a>
+        <p class="mb-0">© 2025 AI Image Generator</p>
+        <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-light">Hugging Face</a> |
+        <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-light">Saigon University</a>
       </div>
     </footer>
   </div>

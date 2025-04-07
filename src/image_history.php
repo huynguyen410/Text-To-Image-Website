@@ -107,11 +107,11 @@
         </div>
     </div>
     <!-- Footer -->
-    <footer class="bg-light text-center py-3">
+    <footer class="bg-dark text-white text-center py-3 border-top border-secondary">
         <div class="container">
-            <p class="text-muted">© 2025 AI Image Generator</p>
-            <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-secondary">Hugging Face</a> |
-            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-secondary">Saigon University</a>
+            <p class="mb-0">© 2025 AI Image Generator</p>
+            <a href="https://huggingface.co/" target="_blank" rel="noopener noreferrer" class="link-light">Hugging Face</a> |
+            <a href="https://www.sgu.edu.vn/" target="_blank" rel="noopener noreferrer" class="link-light">Saigon University</a>
         </div>
     </footer>
 </body>
