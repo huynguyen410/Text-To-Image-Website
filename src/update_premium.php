@@ -8,37 +8,31 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Get POST data
+// Lấy dữ liệu POST
 $data = json_decode(file_get_contents('php://input'), true);
 $total_price = $data['totalPrice'];
 $duration_months = $data['durationMonths'];
 
 $user_id = $_SESSION['user_id'];
 
-// Get customer name from users table
-$sql = "SELECT username FROM users WHERE id = ?";
-$stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "i", $user_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$user = mysqli_fetch_assoc($result);
-$customer_name = $user['username'];
-mysqli_stmt_close($stmt);
+// Bỏ qua phần lấy username vì ta sẽ sử dụng $user_id trực tiếp cho invoice
 
-// Start transaction
+// Khởi tạo giao dịch (transaction)
 mysqli_begin_transaction($conn);
 
 try {
-    // Insert into invoice table
-    $invoice_sql = "INSERT INTO invoice (invoice_id, customer_name, total_price, created_at) 
+    // Chèn vào bảng invoice với cột customer_id thay vì customer_name
+    $invoice_sql = "INSERT INTO invoice (invoice_id, customer_id, total_price, created_at) 
                     VALUES (?, ?, ?, NOW())";
-    $invoice_id = "INV" . time() . rand(100, 999); // Tạo invoice_id đơn giản
+    // Tạo invoice_id đơn giản
+    $invoice_id = "INV" . time() . rand(100, 999); 
     $stmt = mysqli_prepare($conn, $invoice_sql);
-    mysqli_stmt_bind_param($stmt, "ssi", $invoice_id, $customer_name, $total_price);
+    // Bind các tham số: invoice_id (string), customer_id (int), total_price (int)
+    mysqli_stmt_bind_param($stmt, "sii", $invoice_id, $user_id, $total_price);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
-    // Update users table with premium status and dates
+    // Cập nhật bảng users: thay đổi trạng thái premium và cập nhật ngày bắt đầu & hết hạn
     $start_premium = date('Y-m-d');
     $end_premium = date('Y-m-d', strtotime("+$duration_months months"));
     
@@ -52,7 +46,7 @@ try {
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
-    // Commit transaction
+    // Hoàn tất giao dịch
     mysqli_commit($conn);
     
     echo json_encode([
@@ -64,7 +58,7 @@ try {
     ]);
 
 } catch (Exception $e) {
-    // Rollback transaction on error
+    // Nếu có lỗi, rollback giao dịch
     mysqli_rollback($conn);
     echo json_encode([
         'success' => false, 

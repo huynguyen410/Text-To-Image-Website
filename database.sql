@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 25, 2025 at 05:26 AM
+-- Generation Time: Apr 08, 2025 at 03:39 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,35 @@ SET time_zone = "+00:00";
 --
 -- Database: `imagegenerator`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gmail_token`
+--
+
+CREATE TABLE `gmail_token` (
+  `id` int(11) NOT NULL,
+  `access_token` varchar(500) NOT NULL,
+  `refresh_token` varchar(500) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gmail_tokens`
+--
+
+CREATE TABLE `gmail_tokens` (
+  `id` int(11) NOT NULL,
+  `access_token` varchar(255) NOT NULL,
+  `refresh_token` varchar(255) NOT NULL,
+  `expires_in` int(11) NOT NULL COMMENT 'Thời gian sống của access token (giây)',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Thời gian tạo token',
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Thời gian cập nhật token'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -88,21 +117,17 @@ INSERT INTO `image_history` (`id`, `user_id`, `prompt`, `image_url`, `created_at
 
 CREATE TABLE `invoice` (
   `invoice_id` int(11) NOT NULL,
-  `customer_name` varchar(255) NOT NULL,
   `total_price` decimal(10,2) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `customer_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `invoice`
 --
 
-INSERT INTO `invoice` (`invoice_id`, `customer_name`, `total_price`, `created_at`) VALUES
-(1, 'za', 39000.00, '2025-03-24 09:22:42'),
-(2, 'zb', 39000.00, '2025-03-24 09:30:38'),
-(3, 'zka', 69000.00, '2025-03-24 09:52:06'),
-(4, 'abc', 39000.00, '2025-03-24 10:18:18'),
-(5, 'zzz', 69000.00, '2025-03-25 04:18:44');
+INSERT INTO `invoice` (`invoice_id`, `total_price`, `created_at`, `customer_id`) VALUES
+(8, 39000.00, '2025-04-08 12:38:52', NULL);
 
 -- --------------------------------------------------------
 
@@ -175,11 +200,29 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `created_at`, `role`
 (194, 'zka', '$2y$10$lM/Kx5e0yiRsunlywVxeKOj8wpIKCJZRhF0YRkSQshTb.x56USzSS', 'nnguyenzzzhuuducc@gmail.com', '2025-03-24 09:48:17', 'customer', 20, 'yes', '2025-03-24', '2025-02-01'),
 (195, 'abc', '$2y$10$pNWi7tMpVfCM5l4lJHw0Y.RQzcFym8FR1epJeyKean8UQP9o.wD.i', 'nnguyenhzuuducc@gmail.com', '2025-03-24 10:17:08', 'customer', 20, 'yes', '2025-03-24', '2025-04-24'),
 (196, 'testdk', '$2y$10$HoqAQ/a7F8XSAboyTlnYfOf0l1eJ1xe2WIH0b1/Np7JzmNKov34k6', 'nnguyenhuuducc@gmail.com', '2025-03-25 03:34:51', 'customer', 20, 'no', NULL, NULL),
-(213, 'zzz', '$2y$10$JXtIOWJB6b9iTqFMKIc7aOcUQPRUdxo5/K5LBnHjLZcdZo4sN9Rwe', 'nnguyenhuzvvuducc@gmail.com', '2025-03-25 03:54:37', 'customer', 20, 'yes', '2025-03-25', '2025-06-25');
+(213, 'zzz', '$2y$10$JXtIOWJB6b9iTqFMKIc7aOcUQPRUdxo5/K5LBnHjLZcdZo4sN9Rwe', 'nnguyenhuzvvuducc@gmail.com', '2025-03-25 03:54:37', 'customer', 20, 'yes', '2025-03-25', '2025-06-25'),
+(228, 'adaa', '$2y$10$4xCGkXNm4WCPmxybuot4yuXzS.AK6gttGMa1FcVwUys/nDrGUkGsC', 'nnguyenhuuduaaaacc@gmail.com', '2025-03-25 04:38:44', 'customer', 20, 'no', NULL, NULL),
+(229, 'zzb', '$2y$10$2lIpCepDXYYUB/8uTo7DJehAEoSC7rtSKu06OaOSce2rIXyaJoeJq', 'nnguyenzzuuducc@gmail.com', '2025-03-25 06:25:36', 'customer', 20, 'no', '2025-03-25', '2025-02-13'),
+(230, 'az1', '$2y$10$QqoEi4f3NGsy/cEiy91pH.rIsQVa9RZ.iaqTMzlynZRzREnDGCrO.', 'nnguyenhzzzuuducc@gmail.com', '2025-03-26 02:49:57', 'customer', 20, 'yes', '2025-03-12', '2025-06-26'),
+(231, 'zbe', '$2y$10$8YHxK/lTG5I9NQGttK4/V.mxLWm9TpOnktEWxzGKmfCtZbWZ7gs0K', 'nnguyenhudsuducc@gmail.com', '2025-03-26 02:56:18', 'customer', 20, 'no', NULL, NULL),
+(232, 'acb', '$2y$10$6BKXB4GYLPDLuunvGTjbC.Ey7gIZUh4Yayc570MSK8ui5eVR9JMFe', 'nnguyenhuudducc@gmail.com', '2025-03-26 03:06:59', 'customer', 20, 'no', NULL, NULL),
+(234, 'test2003', '$2y$10$QVrfaapP.CyaKCYTexbfR.dZ2wluRBW6c6mQuRv7hrz35dX4WP532', 'test2003@gmail.com', '2025-04-08 13:37:59', 'customer', 20, 'no', NULL, NULL);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `gmail_token`
+--
+ALTER TABLE `gmail_token`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `gmail_tokens`
+--
+ALTER TABLE `gmail_tokens`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `image_history`
@@ -192,7 +235,8 @@ ALTER TABLE `image_history`
 -- Indexes for table `invoice`
 --
 ALTER TABLE `invoice`
-  ADD PRIMARY KEY (`invoice_id`);
+  ADD PRIMARY KEY (`invoice_id`),
+  ADD KEY `fk_customer_id` (`customer_id`);
 
 --
 -- Indexes for table `models`
@@ -214,6 +258,18 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `gmail_token`
+--
+ALTER TABLE `gmail_token`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `gmail_tokens`
+--
+ALTER TABLE `gmail_tokens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `image_history`
 --
 ALTER TABLE `image_history`
@@ -223,7 +279,7 @@ ALTER TABLE `image_history`
 -- AUTO_INCREMENT for table `invoice`
 --
 ALTER TABLE `invoice`
-  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `models`
@@ -235,7 +291,7 @@ ALTER TABLE `models`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=235;
 
 --
 -- Constraints for dumped tables
@@ -246,6 +302,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `image_history`
   ADD CONSTRAINT `image_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `invoice`
+--
+ALTER TABLE `invoice`
+  ADD CONSTRAINT `fk_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

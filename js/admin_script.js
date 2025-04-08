@@ -7,152 +7,122 @@ $(document).ready(function () {
 
     // --- Helper Functions for Modals ---
     function showInfoModal(title, message, isSuccess = true) {
-        if (!infoModal) return; // Kiểm tra modal tồn tại
+        if (!infoModal) return;
         $('#infoModalLabel').text(title);
-        $('#infoModalBody').html(message); // Sử dụng html() để có thể hiển thị HTML nếu cần
+        $('#infoModalBody').html(message);
         const header = $('#infoModalHeader');
         header.removeClass('bg-success bg-danger text-white').addClass(isSuccess ? 'bg-success text-white' : 'bg-danger text-white');
         infoModal.show();
     }
 
     function showConfirmationModal(title, message, confirmCallback) {
-        if (!confirmationModal) return; // Kiểm tra modal tồn tại
+        if (!confirmationModal) return;
         $('#confirmationModalLabel').text(title);
-        $('#confirmationModalBody').html(message); // Sử dụng html()
-
-        // Gắn sự kiện click một lần vào nút confirm
+        $('#confirmationModalBody').html(message);
         $('#confirmActionButton').off('click').one('click', function() {
             confirmationModal.hide();
             if (typeof confirmCallback === 'function') {
                 confirmCallback();
             }
         });
-
         confirmationModal.show();
     }
 
     // --- Sidebar Navigation Logic ---
     function updateContent(hash) {
-        hash = hash || location.hash || '#users'; // Default to #users if no hash
-        
-        // Hide all sections
+        hash = hash || location.hash || '#users';
         $('.admin-section').addClass('d-none');
-        
-        // Show the target section
         try {
             $(hash).removeClass('d-none');
         } catch (e) {
-            console.error("Invalid hash selector:", hash); 
-            $('#users').removeClass('d-none'); // Fallback to users section
-            hash = '#users'; // Reset hash to default
+            console.error("Invalid hash selector:", hash);
+            $('#users').removeClass('d-none');
+            hash = '#users';
         }
-
-        // Update active state in sidebar
         $('#adminSidebar .nav-link').removeClass('active');
         $('#adminSidebar .nav-link[href="' + hash + '"]').addClass('active');
-
-        // Update main content title (optional)
-        let title = 'Admin Panel'; // Default title
+        let title = 'Admin Panel';
         const activeLinkText = $('#adminSidebar .nav-link.active').text().trim();
         if (activeLinkText) {
-            title = activeLinkText + ' Management'; // Or customize as needed
+            title = activeLinkText + ' Management';
         }
         $('#content-title').text(title);
     }
 
-    // Initial content load based on hash
     updateContent();
-
-    // Handle hash changes (clicking sidebar links)
     $(window).on('hashchange', function() {
         updateContent();
     });
 
-    // Ensure clicking the link updates the hash (for browsers that might not automatically)
-     $('#adminSidebar .nav-link').on('click', function(e) {
+    $('#adminSidebar .nav-link').on('click', function(e) {
         const targetHash = $(this).attr('href');
         if (location.hash !== targetHash) {
-             // Let the hashchange event handle the content update
-             location.hash = targetHash;
-        }
-        // If hash is already correct, manually trigger update in case content wasn't loaded
-        else {
+            location.hash = targetHash;
+        } else {
             updateContent(targetHash);
         }
-     });
+    });
 
-    // Hàm chung để tải danh sách với phân trang và limit có thể thay đổi
+    // Hàm load danh sách có phân trang
     function loadList({ url, target, entity, fields, modalId, page = 1, limit = 10 }) {
-        // Only load data if the corresponding section is visible
-        // This prevents unnecessary loads when switching tabs quickly
-        // However, we might want to load initially regardless, so this check is commented out for now.
-        // Consider adding it back if performance becomes an issue.
-        // const sectionId = `#${entity}s`; // Assumes section ID is plural of entity
-        // if ($(sectionId).hasClass('d-none')) { 
-        //    console.log(`Section ${sectionId} is hidden, skipping load for ${entity}`);
-        //    return; 
-        // }
-        
         const listContainer = $(target);
-        listContainer.html('<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'); // Show spinner
+        listContainer.html('<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
         $.ajax({
             url: url,
             type: 'GET',
             dataType: 'json',
-            data: { page: page, limit: limit }, 
+            data: { page: page, limit: limit },
             success: function (data) {
                 if (data.success) {
                     let html = '<table class="table table-hover table-sm align-middle">';
-                    // Add text-center to specific headers
-                    const centeredColumns = ['role', 'is_premium', 'status']; // Columns to center
+                    const centeredColumns = ['role', 'is_premium', 'status'];
                     html += '<thead><tr>';
                     fields.forEach(f => {
-                        const key = f.toLowerCase().replace(' ', '_');
+                        const key = f.toLowerCase().replace(/\s+/g, '_');
                         const thClass = centeredColumns.includes(key) ? ' class="text-center"' : '';
                         html += `<th${thClass}>${f}</th>`;
                     });
                     html += `${entity !== 'invoice' ? '<th>Actions</th>' : ''}</tr></thead>`;
                     html += '<tbody>';
                     data[entity].forEach((item, index) => {
-                        const rowNumber = (page - 1) * limit + index + 1; // Calculate sequential row number
+                        const rowNumber = (page - 1) * limit + index + 1;
                         html += '<tr>';
-                        fields.forEach((field, fieldIndex) => { // Get field index
+                        fields.forEach((field, fieldIndex) => {
                             let value;
                             let displayValue = '-';
-                            const key = field.toLowerCase().replace(' ', '_');
-                            let tdClass = ''; 
+                            const key = field.toLowerCase().replace(/\s+/g, '_');
+                            let tdClass = '';
 
-                            // Use rowNumber for the first column (index 0)
                             if (fieldIndex === 0) {
                                 displayValue = rowNumber;
                             } else {
                                 value = item[key] || null;
-
-                                if (entity === 'user') {
+                                // Nếu là invoice và key customer_id, hiển thị thông báo khi giá trị là null
+                                if (entity === 'invoice' && key === 'customer_id') {
+                                    displayValue = (value !== null)
+                                        ? escapeHtml(value)
+                                        : '<span class="text-danger">Khách hàng đã bị xóa</span>';
+                                } else if (entity === 'user') {
                                     if (key === 'is_premium') {
                                         displayValue = (value && value.toLowerCase() === 'yes') 
-                                                        ? '<span class="badge bg-success">Yes</span>' 
-                                                        : '<span class="badge bg-secondary">No</span>';
-                                        tdClass = 'text-center'; // Căn giữa cột này
+                                            ? '<span class="badge bg-success">Yes</span>' 
+                                            : '<span class="badge bg-secondary">No</span>';
+                                        tdClass = 'text-center';
                                     } else if (key === 'role') {
-                                        if (value && value.toLowerCase() === 'admin') {
-                                            displayValue = '<span class="badge bg-primary">Admin</span>';
-                                        } else {
-                                            displayValue = '<span class="badge bg-secondary">Customer</span>';
-                                        }
-                                        tdClass = 'text-center'; // Căn giữa cột này
+                                        displayValue = (value && value.toLowerCase() === 'admin') 
+                                            ? '<span class="badge bg-primary">Admin</span>' 
+                                            : '<span class="badge bg-secondary">Customer</span>';
+                                        tdClass = 'text-center';
                                     } else {
                                         displayValue = value ? escapeHtml(value) : '-';
                                     }
                                 } else if (entity === 'model') {
                                     if (key === 'status') {
-                                        if (value && value.toLowerCase() === 'active') {
-                                            displayValue = '<span class="badge bg-success">Active</span>';
-                                        } else {
-                                            displayValue = '<span class="badge bg-warning">Inactive</span>';
-                                        }
-                                        tdClass = 'text-center'; // Căn giữa cột này
+                                        displayValue = (value && value.toLowerCase() === 'active') 
+                                            ? '<span class="badge bg-success">Active</span>' 
+                                            : '<span class="badge bg-warning">Inactive</span>';
+                                        tdClass = 'text-center';
                                     } else {
                                         displayValue = value ? escapeHtml(value) : '-';
                                     }
@@ -163,9 +133,9 @@ $(document).ready(function () {
 
                             html += `<td${tdClass ? ' class="' + tdClass + '"' : ''}>${displayValue}</td>`;
                         });
-                        
+
                         if (entity !== 'invoice') {
-                            const entityId = item.id; // Use actual item.id for actions, not rowNumber!
+                            const entityId = item.id;
                             html += `<td class="text-nowrap">
                                 <button class="btn btn-sm btn-outline-warning edit-${entity} me-1" data-id="${entityId}" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
@@ -174,8 +144,6 @@ $(document).ready(function () {
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>`;
-                        } else {
-                             // Handle potential actions for invoices if needed in the future
                         }
                         html += '</tr>';
                     });
@@ -223,11 +191,10 @@ $(document).ready(function () {
                         $(`.delete-${entity}`).on('click', function () {
                             const id = $(this).data('id');
                             const entityName = entity.charAt(0).toUpperCase() + entity.slice(1);
-                            
                             showConfirmationModal(
                                 `Confirm Deletion`, 
                                 `Are you sure you want to delete this ${entityName}?`, 
-                                function() { // Callback khi nhấn Confirm
+                                function() {
                                     $.ajax({
                                         url: `../admin/delete_${entity}.php`,
                                         type: 'POST',
@@ -240,7 +207,6 @@ $(document).ready(function () {
                                                 response.success
                                             );
                                             if (response.success) {
-                                                // Tải lại trang hiện tại sau khi xóa thành công
                                                 loadList({ url, target, entity, fields, modalId, page: data.page, limit: limit });
                                             }
                                         },
@@ -268,10 +234,10 @@ $(document).ready(function () {
         });
     }
 
-    // Hàm lưu chỉnh sửa (không thay đổi cho user và model)
+    // Hàm lưu chỉnh sửa cho User và Model
     function saveEdit({ modalId, entity, formId, url, reloadFn }) {
         const modalElement = $(`#${modalId}`);
-        modalElement.find('.modal-footer .btn-primary').off('click').on('click', function () { 
+        modalElement.find('.modal-footer .btn-primary').off('click').on('click', function () {
             const form = modalElement.find(`#${formId}`)[0];
             if (form && typeof form.checkValidity === 'function' && !form.checkValidity()) {
                 form.reportValidity();
@@ -309,7 +275,7 @@ $(document).ready(function () {
         });
     }
 
-    // Cấu hình ban đầu cho danh sách (lấy limit từ dropdown)
+    // Cấu hình ban đầu cho danh sách
     let userConfig = {
         url: '../admin/get_users.php',
         target: '#user-list',
@@ -334,21 +300,21 @@ $(document).ready(function () {
         url: '../admin/get_invoices.php',
         target: '#invoice-list',
         entity: 'invoice',
-        fields: ['Invoice ID', 'Customer Name', 'Total Price', 'Created At'],
+        fields: ['Invoice ID', 'Customer ID', 'Total Price', 'Created At'],
         modalId: '',
         page: 1,
         limit: parseInt($('#invoiceLimit').val())
     };
 
-    // Tải danh sách ban đầu cho các entity
+    // Tải danh sách ban đầu
     loadList(userConfig);
     loadList(modelConfig);
     loadList(invoiceConfig);
 
-    // Sự kiện khi thay đổi số mục hiển thị trong dropdown
+    // Sự kiện thay đổi số mục hiển thị
     $('#userLimit').on('change', function() {
         userConfig.limit = parseInt($(this).val());
-        userConfig.page = 1; // reset về trang đầu tiên
+        userConfig.page = 1;
         loadList(userConfig);
     });
 
@@ -364,7 +330,7 @@ $(document).ready(function () {
         loadList(invoiceConfig);
     });
 
-    // Modal thêm mới cho các entity (Load form vào modal body)
+    // Modal thêm mới cho User và Model
     ['User', 'Model'].forEach(entity => {
         const modalId = `#add${entity}Modal`;
         $(modalId).on('show.bs.modal', function () {
@@ -372,7 +338,7 @@ $(document).ready(function () {
                 const addForm = $(`${modalId} form`);
                 if (addForm.length) {
                     const addUrl = `../admin/add_${entity.toLowerCase()}.php`;
-                    const reloadListConfig = entity === 'User' ? userConfig : modelConfig;
+                    const reloadListConfig = (entity === 'User') ? userConfig : modelConfig;
 
                     addForm.off('submit').on('submit', function(e) {
                         e.preventDefault();
@@ -410,7 +376,7 @@ $(document).ready(function () {
         });
     });
 
-    // Gọi hàm saveEdit cho User và Model (Gắn sự kiện cho nút save trong edit modals)
+    // Gọi hàm saveEdit cho User và Model
     saveEdit({
         modalId: 'editUserModal',
         entity: 'user',
@@ -427,15 +393,15 @@ $(document).ready(function () {
         reloadFn: () => loadList(modelConfig)
     });
 
-    // Toggle password (nếu có)
-    $(document).on('click', '.togglePassword', function () { 
+    // Toggle password
+    $(document).on('click', '.togglePassword', function () {
         const input = $(this).prev('input');
         const icon = $(this).find('i');
         input.attr('type', input.attr('type') === 'password' ? 'text' : 'password');
         icon.toggleClass('bi-eye bi-eye-slash');
     });
 
-    // Hàm escape HTML để tránh XSS
+    // Hàm escape HTML
     function escapeHtml(text) {
         var map = {
             '&': '&amp;',
@@ -444,8 +410,8 @@ $(document).ready(function () {
             '"': '&quot;',
             "'": '&#039;'
         };
-        if (text == null) return ''; 
-        text = String(text); 
+        if (text == null) return '';
+        text = String(text);
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 });

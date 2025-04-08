@@ -1,12 +1,8 @@
 <?php
-ob_start(); // Bắt đầu output buffering
+ob_start();
 header('Content-Type: application/json');
 session_start();
 require_once '../src/db_connect.php';
-
-// Cho mục đích debug, tạm thời bật hiển thị lỗi (sau này nên tắt lại)
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
 
 // Kiểm tra quyền admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { 
@@ -33,8 +29,8 @@ $totalRow = mysqli_fetch_assoc($countResult);
 $total = $totalRow['total'];
 $total_pages = ceil($total / $limit);
 
-// Lấy danh sách invoice với phân trang (sử dụng cột created_at thay vì create_at)
-$sql = "SELECT invoice_id, customer_name, total_price, created_at FROM invoice LIMIT $limit OFFSET $offset";
+// Lấy danh sách invoice với các cột đã được cập nhật
+$sql = "SELECT invoice_id, customer_id, total_price, created_at FROM invoice LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 if (!$result) {
     echo json_encode(['success' => false, 'message' => 'Fetch Query Error: ' . mysqli_error($conn)]);
@@ -47,7 +43,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 }
 
 mysqli_close($conn);
-ob_end_clean(); // Loại bỏ output buffering để không có ký tự thừa
+ob_end_clean();
 echo json_encode([
     'success'     => true, 
     'invoice'     => $invoices, 
