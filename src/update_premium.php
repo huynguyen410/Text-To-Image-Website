@@ -15,13 +15,11 @@ $duration_months = $data['durationMonths'];
 
 $user_id = $_SESSION['user_id'];
 
-// Bỏ qua phần lấy username vì ta sẽ sử dụng $user_id trực tiếp cho invoice
-
 // Khởi tạo giao dịch (transaction)
 mysqli_begin_transaction($conn);
 
 try {
-    // Chèn vào bảng invoice với cột customer_id thay vì customer_name
+    // Chèn vào bảng invoice với cột customer_id
     $invoice_sql = "INSERT INTO invoice (invoice_id, customer_id, total_price, created_at) 
                     VALUES (?, ?, ?, NOW())";
     // Tạo invoice_id đơn giản

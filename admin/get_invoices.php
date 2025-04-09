@@ -30,7 +30,8 @@ $total = $totalRow['total'];
 $total_pages = ceil($total / $limit);
 
 // Lấy danh sách invoice với các cột đã được cập nhật
-$sql = "SELECT i.invoice_id, i.customer_id, i.total_price, i.created_at, u.username as customer_name 
+$sql = "SELECT i.invoice_id, i.customer_id, i.total_price, i.created_at, 
+        u.username as customer_name 
         FROM invoice i 
         LEFT JOIN users u ON i.customer_id = u.id 
         LIMIT $limit OFFSET $offset";
