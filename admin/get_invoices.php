@@ -30,7 +30,10 @@ $total = $totalRow['total'];
 $total_pages = ceil($total / $limit);
 
 // Lấy danh sách invoice với các cột đã được cập nhật
-$sql = "SELECT invoice_id, customer_id, total_price, created_at FROM invoice LIMIT $limit OFFSET $offset";
+$sql = "SELECT i.invoice_id, i.customer_id, i.total_price, i.created_at, u.username as customer_name 
+        FROM invoice i 
+        LEFT JOIN users u ON i.customer_id = u.id 
+        LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 if (!$result) {
     echo json_encode(['success' => false, 'message' => 'Fetch Query Error: ' . mysqli_error($conn)]);

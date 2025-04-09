@@ -98,11 +98,11 @@ $(document).ready(function () {
                                 displayValue = rowNumber;
                             } else {
                                 value = item[key] || null;
-                                // Nếu là invoice và key customer_id, hiển thị thông báo khi giá trị là null
-                                if (entity === 'invoice' && key === 'customer_id') {
+                                // Nếu là invoice và key customer_id hoặc customer_name, hiển thị thông báo khi giá trị là null
+                                if (entity === 'invoice' && (key === 'customer_id' || key === 'customer_name')) {
                                     displayValue = (value !== null)
                                         ? escapeHtml(value)
-                                        : '<span class="text-danger">Khách hàng đã bị xóa</span>';
+                                        : '<span class="text-danger">This account has been deleted</span>';
                                 } else if (entity === 'user') {
                                     if (key === 'is_premium') {
                                         displayValue = (value && value.toLowerCase() === 'yes') 
@@ -300,7 +300,7 @@ $(document).ready(function () {
         url: '../admin/get_invoices.php',
         target: '#invoice-list',
         entity: 'invoice',
-        fields: ['Invoice ID', 'Customer ID', 'Total Price', 'Created At'],
+        fields: ['Invoice ID', 'Customer ID', 'Customer Name', 'Total Price', 'Created At'],
         modalId: '',
         page: 1,
         limit: parseInt($('#invoiceLimit').val())
