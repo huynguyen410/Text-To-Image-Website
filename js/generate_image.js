@@ -273,54 +273,48 @@ const ensureModelGroupExists = (groupId, modelName) => {
 
 const generateAiImages = async (prompt, style, quantity, selectedModels) => {
   try {
-    generatedImages = {}; // Reset generated images object
-
-    // Khởi tạo mảng rỗng cho các model được chọn
+    generatedImages = {}; // Reset đối tượng chứa ảnh đã tạo
+    // Khởi tạo mảng ảnh cho các model được chọn
     selectedModels.forEach(modelId => {
-       if (modelDataMap[modelId]) { // Chỉ khởi tạo cho model hợp lệ đã load
-         generatedImages[modelId] = [];
-       }
+      if (modelDataMap[modelId]) {
+        generatedImages[modelId] = [];
+      }
     });
 
-    // Tạo ảnh tuần tự cho từng model (bạn có thể tối ưu chạy song song nếu muốn)
+    // Tạo ảnh cho từng model (vòng lặp bên ngoài) và mỗi ảnh (vòng lặp bên trong)
     for (const modelId of selectedModels) {
-        // Bỏ qua nếu model không có trong dữ liệu đã load (phòng trường hợp lỗi)
-        if (!modelDataMap[modelId]) {
-            console.warn(`Model ${modelId} không có trong dữ liệu đã tải, bỏ qua tạo ảnh.`);
-            continue;
-        }
-
+      // Kiểm tra nếu model không hợp lệ, bỏ qua
+      if (!modelDataMap[modelId]) {
+        console.warn(`Model ${modelId} không có trong dữ liệu đã tải.`);
+        continue;
+      }
       for (let i = 0; i < quantity; i++) {
-        const blob = await generateSingleImage(modelId, prompt, style, i); // Truyền i làm variation
+        const blob = await generateSingleImage(modelId, prompt, style, i); // Sử dụng biến i làm variation
         if (blob) {
           const url = URL.createObjectURL(blob);
-           // Đảm bảo mảng tồn tại trước khi push
-           if (!generatedImages[modelId]) {
-               generatedImages[modelId] = [];
-           }
           generatedImages[modelId].push({ url, blob });
-          updateImageContainer(selectedModels); // Cập nhật UI sau mỗi ảnh
-
-          const blobSize = blob.size / 1024;
-          // Cần đảm bảo modelId tồn tại trong DB trước khi lưu lsử
-          saveImageToHistory(prompt, style, url, blobSize, modelId);
+          // Xóa hoặc comment lời gọi cập nhật giao diện ở đây
+          // updateImageContainer(selectedModels);
         } else {
-            // Có thể thêm xử lý nếu generateSingleImage trả về null (thất bại)
-            console.warn(`Không thể tạo ảnh thứ ${i+1} cho model ${modelId}`);
+          console.warn(`Không thể tạo ảnh thứ ${i + 1} cho model ${modelId}`);
         }
       }
     }
+
+    // Sau khi hoàn tất việc tạo ảnh cho tất cả model, cập nhật giao diện một lần duy nhất:
+    updateImageContainer(selectedModels);
   } catch (error) {
     showAlert(`Có lỗi xảy ra khi tạo ảnh: ${error.message}`, "danger");
     console.error("Error during image generation process:", error);
   } finally {
     isImageGenerating = false;
-    if(generateBtn){
-        generateBtn.removeAttribute("disabled");
-        generateBtn.innerText = "Generate";
+    if (generateBtn) {
+      generateBtn.removeAttribute("disabled");
+      generateBtn.innerText = "Generate";
     }
   }
 };
+
 
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {

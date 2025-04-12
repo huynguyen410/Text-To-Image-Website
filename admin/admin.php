@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
     <!-- Optional: Add custom admin CSS if needed -->
     <link rel="stylesheet" href="../css/admin_style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
     <?php 
