@@ -44,15 +44,16 @@ if (!in_array($status, ['active', 'inactive'])) {
     exit;
 }
 
-// Chuẩn bị và thực thi câu lệnh SQL
+// Chuẩn bị câu lệnh SQL
 $sql = "UPDATE models SET model_id = ?, name = ?, description = ?, status = ? WHERE id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 if (!$stmt) {
-    echo json_encode(['success' => false, 'message' => 'Prepare statement failed: ' . mysqli_error($conn)]);
+    error_log("Edit model prepare failed: " . mysqli_error($conn));
+    echo json_encode(['success' => false, 'message' => 'Database error preparing update.']);
     exit;
 }
-
 mysqli_stmt_bind_param($stmt, "ssssi", $model_id, $name, $description, $status, $id);
+
 if (mysqli_stmt_execute($stmt)) {
     echo json_encode(['success' => true, 'message' => 'Model updated successfully']);
 } else {

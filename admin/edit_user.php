@@ -42,11 +42,21 @@ if (!empty($password)) {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $sql = "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        error_log("Edit user (with pass) prepare failed: " . mysqli_error($conn));
+        echo json_encode(['success' => false, 'message' => 'Database error preparing update (with pass).']);
+        exit;
+    }
     mysqli_stmt_bind_param($stmt, "sssi", $username, $email, $hashed_password, $id);
 } else {
     // Nếu không có mật khẩu mới, chỉ cập nhật username và email
     $sql = "UPDATE users SET username = ?, email = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        error_log("Edit user (no pass) prepare failed: " . mysqli_error($conn));
+        echo json_encode(['success' => false, 'message' => 'Database error preparing update (no pass).']);
+        exit;
+    }
     mysqli_stmt_bind_param($stmt, "ssi", $username, $email, $id);
 }
 

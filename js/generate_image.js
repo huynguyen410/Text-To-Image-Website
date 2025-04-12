@@ -273,38 +273,60 @@ const ensureModelGroupExists = (groupId, modelName) => {
 
 const generateAiImages = async (prompt, style, quantity, selectedModels) => {
   try {
-    generatedImages = {}; // Reset đối tượng chứa ảnh đã tạo
-    // Khởi tạo mảng ảnh cho các model được chọn
+    generatedImages = {}; 
     selectedModels.forEach(modelId => {
       if (modelDataMap[modelId]) {
         generatedImages[modelId] = [];
       }
     });
 
-    // Tạo ảnh cho từng model (vòng lặp bên ngoài) và mỗi ảnh (vòng lặp bên trong)
+    // Use Promise.allSettled to generate images somewhat concurrently and save history
+    const generationPromises = [];
     for (const modelId of selectedModels) {
-      // Kiểm tra nếu model không hợp lệ, bỏ qua
       if (!modelDataMap[modelId]) {
         console.warn(`Model ${modelId} không có trong dữ liệu đã tải.`);
         continue;
       }
       for (let i = 0; i < quantity; i++) {
-        const blob = await generateSingleImage(modelId, prompt, style, i); // Sử dụng biến i làm variation
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          generatedImages[modelId].push({ url, blob });
-          // Xóa hoặc comment lời gọi cập nhật giao diện ở đây
-          // updateImageContainer(selectedModels);
-        } else {
-          console.warn(`Không thể tạo ảnh thứ ${i + 1} cho model ${modelId}`);
-        }
+        // Push a promise for each image generation AND saving
+        generationPromises.push(
+          generateSingleImage(modelId, prompt, style, i)
+            .then(blob => {
+              if (blob) {
+                const url = URL.createObjectURL(blob);
+                // Store for immediate display
+                if (!generatedImages[modelId]) generatedImages[modelId] = [];
+                generatedImages[modelId].push({ url, blob }); 
+                
+                // *** CALL SAVE HISTORY HERE ***
+                // We need prompt, style, modelId, url, and the blob itself
+                // console.log(`Attempting to save history for: ${modelId}, Image Index: ${i}`); // Commented out
+                // Call saveImageToHistory asynchronously, don't necessarily wait for it
+                saveImageToHistory(prompt, style, url, blob, modelId); 
+                
+                return { modelId, status: 'fulfilled', value: {url, blob} }; // Indicate success for this image
+              } else {
+                console.warn(`Không thể tạo ảnh thứ ${i + 1} cho model ${modelId}`);
+                return { modelId, status: 'rejected', reason: `Failed generation for ${modelId} index ${i}` }; // Indicate failure
+              }
+            })
+            .catch(error => {
+                 console.error(`Lỗi nghiêm trọng khi tạo/lưu ảnh cho ${modelId} index ${i}:`, error);
+                 return { modelId, status: 'rejected', reason: error.message }; // Indicate failure
+            })
+        );
       }
     }
 
-    // Sau khi hoàn tất việc tạo ảnh cho tất cả model, cập nhật giao diện một lần duy nhất:
+    // Wait for all generation/saving attempts to settle
+    const results = await Promise.allSettled(generationPromises);
+    // console.log("Generation and saving results:", results);
+
+    // Update the UI once after all attempts
     updateImageContainer(selectedModels);
+
   } catch (error) {
-    showAlert(`Có lỗi xảy ra khi tạo ảnh: ${error.message}`, "danger");
+    showAlert(`Có lỗi xảy ra trong quá trình tạo ảnh: ${error.message}`, "danger");
     console.error("Error during image generation process:", error);
   } finally {
     isImageGenerating = false;
@@ -509,38 +531,43 @@ if(generateForm){
 }
 
 
-const saveImageToHistory = async (prompt, style, imageUrl, blobSize, modelId) => {
+const saveImageToHistory = async (prompt, style, imageUrl, blob, modelId) => {
   try {
-    // Chuyển blob URL thành base64
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      throw new Error(`Không thể lấy blob: ${response.status}`);
-    }
-    const blob = await response.blob();
+    // Chuyển blob thành base64
     const reader = new FileReader();
     reader.readAsDataURL(blob);
-    const base64Promise = new Promise((resolve) => {
+    const base64Promise = new Promise((resolve, reject) => {
       reader.onloadend = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error); // Thêm error handler
     });
-    const imageData = await base64Promise;
+    const imageData = await base64Promise; // imageData giờ là chuỗi base64 (data:image/...) 
+
+    if (!imageData) {
+        throw new Error("Không thể đọc dữ liệu ảnh (base64).");
+    }
 
     const formData = new FormData();
     formData.append('prompt', prompt);
     formData.append('style', style);
-    formData.append('image_data', imageData);
-    formData.append('blob_size', blobSize);
+    // Gửi toàn bộ chuỗi base64, PHP sẽ xử lý phần tiền tố `data:image/...;base64,`
+    formData.append('image_data', imageData); 
     formData.append('model_id', modelId);
+    // Không cần gửi blob_size nữa, PHP có thể tự kiểm tra kích thước file sau khi decode
+    // formData.append('blob_size', blob.size); 
 
-    // console.log('Dữ liệu gửi đi:', { prompt, style, imageData: imageData.slice(0, 50) + '...', blobSize, modelId });
+    // console.log(`Sending data to save_image_history.php for model: ${modelId}`); // Commented out
+    // console.log('Data sent:', { prompt, style, imageData: imageData.substring(0, 60) + '...', modelId });
 
     const responseFetch = await fetch("save_image_history.php", {
       method: "POST",
-      body: formData,
+      body: formData, // Gửi FormData
     });
 
+    // Kiểm tra status và đọc phản hồi
     if (!responseFetch.ok) {
       const text = await responseFetch.text();
-      throw new Error(`HTTP error! Status: ${responseFetch.status}, Response: ${text}`);
+      console.error(`Save history HTTP error! Status: ${responseFetch.status}, Response: ${text}`);
+      throw new Error(`Lưu lịch sử thất bại (HTTP ${responseFetch.status})`);
     }
 
     let data;
@@ -548,12 +575,24 @@ const saveImageToHistory = async (prompt, style, imageUrl, blobSize, modelId) =>
       data = await responseFetch.json();
     } catch (jsonError) {
       const text = await responseFetch.text(); // Đọc lại text nếu JSON thất bại
-      console.error('Phản hồi không phải JSON:', text);
-      throw new Error(`Phản hồi không phải JSON: ${text.slice(0, 100)}...`);
+      console.error('Phản hồi từ save_image_history không phải JSON:', text);
+      throw new Error(`Lỗi xử lý phản hồi lưu lịch sử.`);
     }
+    
+    // Kiểm tra phản hồi JSON từ PHP
+    if (!data.success) {
+      console.error('Lỗi từ save_image_history.php:', data.message);
+      throw new Error(data.message || 'Lỗi không xác định khi lưu lịch sử.');
+    }
+
+    // console.log(`Lịch sử ảnh đã lưu thành công cho model: ${modelId}`); // Commented out
+
   } catch (error) {
-    console.error("Error saving image history:", error.message);
-    showAlert(`Lỗi khi lưu lịch sử ảnh: ${error.message}`, "danger");
+    // Hiển thị lỗi cho người dùng một cách thân thiện
+    console.error("Lỗi trong hàm saveImageToHistory:", error.message);
+    // Không nên hiển thị lỗi kỹ thuật trực tiếp cho người dùng nếu không cần thiết
+    // showAlert(`Không thể lưu lịch sử ảnh: ${error.message}`, "danger"); 
+    showAlert("Không thể lưu lịch sử ảnh. Vui lòng thử lại sau.", "warning"); 
   }
 };
 

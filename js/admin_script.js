@@ -211,11 +211,18 @@ $(document).ready(function () {
                                             }
                                         },
                                         error: (xhr, status, error) => {
-                                            showInfoModal(
-                                                'Error',
-                                                `Failed to delete ${entityName}. Server error: ${error}`,
-                                                false
-                                            );
+                                            // Improved error handling for delete
+                                            let errorMsg = `Failed to delete ${entityName}. Unknown error occurred.`;
+                                            if (xhr.responseText) {
+                                                 // Attempt to show server message if available, but be cautious
+                                                 // Avoid showing raw HTML/PHP errors directly
+                                                 // We expect JSON, so if responseText is not JSON, it's likely an server error page/message
+                                                // console.error("Server Response (non-JSON):", xhr.responseText.substring(0, 500)); // Log for debug
+                                                errorMsg = `Failed to delete ${entityName}. Server responded unexpectedly. Please check server logs.`;
+                                            } else if (error) {
+                                                errorMsg = `Failed to delete ${entityName}. Client-side error: ${error}`; 
+                                            }
+                                            showInfoModal('Error', errorMsg, false);
                                         }
                                     });
                                 }
@@ -228,8 +235,16 @@ $(document).ready(function () {
                 }
             },
             error: (xhr, status, error) => {
-                showInfoModal('Network Error', `Failed to load ${entity}s. Status: ${status}, Error: ${error}`, false);
-                $(target).html(`<p class="text-danger text-center">Failed to load data. Check connection or server status.</p>`);
+                // Improved error handling for loadList
+                let errorMsg = `Failed to load ${entity}s. Please check connection or server status.`;
+                 if (xhr.responseText) {
+                     // console.error("Server Response (non-JSON):", xhr.responseText.substring(0, 500)); // Log for debug
+                    errorMsg = `Failed to load ${entity}s. Server responded unexpectedly. Please check server logs.`;
+                 } else if (error) {
+                    errorMsg = `Failed to load ${entity}s. Client-side error: ${error}`;
+                 }
+                showInfoModal('Network Error', errorMsg, false);
+                $(target).html(`<p class="text-danger text-center">Failed to load data.</p>`); 
             }
         });
     }
@@ -265,11 +280,15 @@ $(document).ready(function () {
                     }
                 },
                 error: (xhr, status, error) => {
-                    showInfoModal(
-                        'Error',
-                        `Failed to update ${entityName}. Server error: ${error}`,
-                        false
-                    );
+                    // Improved error handling for saveEdit
+                    let errorMsg = `Failed to update ${entityName}. Unknown error occurred.`;
+                    if (xhr.responseText) {
+                        // console.error("Server Response (non-JSON):", xhr.responseText.substring(0, 500)); // Log for debug
+                         errorMsg = `Failed to update ${entityName}. Server responded unexpectedly. Please check server logs.`;
+                    } else if (error) {
+                        errorMsg = `Failed to update ${entityName}. Client-side error: ${error}`;
+                    }
+                    showInfoModal('Error', errorMsg, false);
                 }
             });
         });
@@ -363,11 +382,15 @@ $(document).ready(function () {
                                 }
                             },
                             error: (xhr, status, error) => {
-                                showInfoModal(
-                                    'Error',
-                                    `Failed to add ${entityName}. Server error: ${error}`,
-                                    false
-                                );
+                                // Improved error handling for add form submit
+                                let errorMsg = `Failed to add ${entityName}. Unknown error occurred.`;
+                                if (xhr.responseText) {
+                                     // console.error("Server Response (non-JSON):", xhr.responseText.substring(0, 500)); // Log for debug
+                                     errorMsg = `Failed to add ${entityName}. Server responded unexpectedly. Please check server logs.`;
+                                } else if (error) {
+                                     errorMsg = `Failed to add ${entityName}. Client-side error: ${error}`;
+                                }
+                                showInfoModal('Error', errorMsg, false);
                             }
                         });
                     });

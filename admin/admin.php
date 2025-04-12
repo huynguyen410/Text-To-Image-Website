@@ -29,9 +29,11 @@
     ?>
 
     <!-- Admin Specific Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark"> <!-- Use dark background for admin -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3"> <!-- Added py-3 for more height -->
         <div class="container-fluid">
-            <a class="navbar-brand" href="admin.php">Admin Panel</a>
+            <a class="navbar-brand fs-5" href="admin.php"> <!-- Added fs-5 for slightly larger brand -->
+                <i class="bi bi-sliders me-2"></i>Admin Panel <!-- Added icon -->
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar"
                     aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
