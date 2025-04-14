@@ -129,6 +129,11 @@
                 <div id="invoices" class="admin-section d-none">
                      <div class="card shadow-sm mb-4"> 
                         <div class="card-header bg-light d-flex justify-content-between align-items-center"> 
+                            <!-- Export Button -->
+                            <button id="exportInvoicesBtn" class="btn btn-sm btn-outline-success me-2">
+                                <i class="bi bi-file-earmark-arrow-down me-1"></i>Export Report
+                            </button>
+                            <!-- Limit Select -->
                              <select id="invoiceLimit" class="form-select form-select-sm d-inline-block w-auto" style="margin-left: auto;">
                                 <option value="5">5</option>
                                 <option value="10" selected>10</option>

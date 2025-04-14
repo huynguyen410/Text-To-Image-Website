@@ -349,6 +349,13 @@ $(document).ready(function () {
         loadList(invoiceConfig);
     });
 
+    // --- Export Invoices Button Click --- 
+    $(document).on('click', '#exportInvoicesBtn', function() {
+        // Đơn giản là chuyển hướng đến script xuất file
+        window.location.href = 'export_invoices.php';
+    });
+    // --- End Export --- 
+
     // Modal thêm mới cho User và Model
     ['User', 'Model'].forEach(entity => {
         const modalId = `#add${entity}Modal`;
