@@ -1,5 +1,9 @@
 {
-    "access_token": "ya29.a0AZYkNZiRU2aQkzyHbzUgEXmWgBZz9oMAA9JPrXylzEMsodrNnmDgK1yCOvM-8uKDW9LhVWV27UAznqnJVH9qYeDyV_JTqzd1UqKAHhtpo2ltodu0hUN1WtZqBMPet7fDIQ5C_apxXIhlopOsg2hV5-euI8JIsdRVILCfQO4skAaCgYKAUgSARISFQHGX2Mi-wYW0AIDVJqdmlmJLNOfcg0177",
+    "access_token": "ya29.a0AZYkNZhNDspssrsOUYFIycALfTNwHI_b3FrYShLtFHplH4CeG8lgGDPUNT-HgV8cTciHNrgmgaz9wY_glARCCnV9DepVdKfXOMntxwnfZeh1pYphHLgF4cTQYID-3PSgODZg8ILoBNduBmT1ceJx-1VKbHwfBVj5Qe3Pj5c8NQaCgYKARYSARYSFQHGX2Miy1EfGGuJlz91FoU0TN7H0Q0177",
     "expires_in": 3599,
-    "created": 1744165266
+    "refresh_token": "1\/\/0e3t8fPfH3A0pCgYIARAAGA4SNwF-L9IrEdt8EqvAtyQN-hefC8utt_eNYhxdQuL3yHZsoZJDzRfTZxD-Rkt0c3DM-_2PRAAz6zc",
+    "scope": "https:\/\/www.googleapis.com\/auth\/gmail.readonly",
+    "token_type": "Bearer",
+    "refresh_token_expires_in": 604799,
+    "created": 1744639065
 }
