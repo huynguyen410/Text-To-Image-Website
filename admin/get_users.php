@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit;
 }
 
-$allowedLimits = [5, 10, 20, 25, 50]; // Thêm 25 vào danh sách hợp lệ
+$allowedLimits = [5, 10, 20, 25, 50];
 $limit = isset($_GET['limit']) && in_array(intval($_GET['limit']), $allowedLimits) ? intval($_GET['limit']) : 10;
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 if ($page < 1) {
@@ -17,9 +17,7 @@ if ($page < 1) {
 }
 $offset = ($page - 1) * $limit;
 
-// --- THÊM ĐIỀU KIỆN LỌC deleted_at ---
 $whereClause = " WHERE deleted_at IS NULL ";
-// --- KẾT THÚC THÊM ĐIỀU KIỆN ---
 
 // Lấy tổng số dòng (chỉ đếm người dùng chưa bị xóa mềm)
 $countSql = "SELECT COUNT(*) AS total FROM users" . $whereClause;
@@ -32,15 +30,16 @@ $totalRow = mysqli_fetch_assoc($countResult);
 $total = $totalRow['total'];
 $total_pages = ($limit > 0) ? ceil($total / $limit) : 0;
 
-// Lấy danh sách người dùng theo phân trang (chỉ lấy người dùng chưa bị xóa mềm)
+// --- THAY ĐỔI ORDER BY ---
 $sql = "SELECT id, username, email, created_at, role,
                isPremium as is_premium,
                startPremium as start_premium,
                endPremium as end_premium
         FROM users
        " . $whereClause . "
-        ORDER BY created_at DESC -- Sắp xếp theo ngày tạo mới nhất (tùy chọn)
-        LIMIT ? OFFSET ?"; // Sử dụng prepared statement
+        ORDER BY id ASC -- Sắp xếp theo ID tăng dần
+        LIMIT ? OFFSET ?";
+// --- KẾT THÚC THAY ĐỔI ---
 
 $stmt = mysqli_prepare($conn, $sql);
 if (!$stmt) {
@@ -51,7 +50,6 @@ mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
-
 $users = array();
 while ($row = mysqli_fetch_assoc($result)) {
     $users[] = $row;
@@ -61,7 +59,7 @@ mysqli_close($conn);
 
 echo json_encode([
     'success' => true,
-    'user' => $users, // Giữ nguyên key 'user' như trong JS đang dùng
+    'user' => $users,
     'page' => $page,
     'total_pages' => $total_pages
 ]);
