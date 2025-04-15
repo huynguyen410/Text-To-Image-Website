@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2025 at 03:39 PM
+-- Generation Time: Apr 15, 2025 at 11:06 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,31 +24,22 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `gmail_token`
+-- Table structure for table `gmail_credentials`
 --
 
-CREATE TABLE `gmail_token` (
+CREATE TABLE `gmail_credentials` (
   `id` int(11) NOT NULL,
-  `access_token` varchar(500) NOT NULL,
-  `refresh_token` varchar(500) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `credential_key` varchar(50) NOT NULL DEFAULT 'main_refresh_token',
+  `refresh_token` text DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `gmail_tokens`
+-- Dumping data for table `gmail_credentials`
 --
 
-CREATE TABLE `gmail_tokens` (
-  `id` int(11) NOT NULL,
-  `access_token` varchar(255) NOT NULL,
-  `refresh_token` varchar(255) NOT NULL,
-  `expires_in` int(11) NOT NULL COMMENT 'Thời gian sống của access token (giây)',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Thời gian tạo token',
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Thời gian cập nhật token'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT INTO `gmail_credentials` (`id`, `credential_key`, `refresh_token`, `updated_at`) VALUES
+(1, 'main_refresh_token', '1//0eakGcIXmu1naCgYIARAAGA4SNwF-L9IrbcxK1tZTTDpxYI6dCSckbVYdKxnEcL0OmcYRsYeRgR6d9JgS_ZyQpZv9ndv8Le6OVy8', '2025-04-14 14:51:38');
 
 -- --------------------------------------------------------
 
@@ -63,7 +54,7 @@ CREATE TABLE `image_history` (
   `image_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `style` varchar(50) DEFAULT NULL,
-  `model` varchar(50) NOT NULL,
+  `model` varchar(50) DEFAULT NULL,
   `creation_id` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -107,7 +98,39 @@ INSERT INTO `image_history` (`id`, `user_id`, `prompt`, `image_url`, `created_at
 (170, 160, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67d944d83e28d.jpg', '2025-03-18 10:03:04', 'realistic', 'black-forest-labs/FLUX.1-dev', '67d944d83f118'),
 (171, 160, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67d944d924d71.jpg', '2025-03-18 10:03:05', 'realistic', 'black-forest-labs/FLUX.1-dev', '67d944d925f75'),
 (172, 160, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67d944d9c9836.jpg', '2025-03-18 10:03:05', 'realistic', 'black-forest-labs/FLUX.1-dev', '67d944d9ca792'),
-(173, 160, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67d944dade722.jpg', '2025-03-18 10:03:06', 'realistic', 'black-forest-labs/FLUX.1-dev', '67d944dadfb49');
+(173, 160, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67d944dade722.jpg', '2025-03-18 10:03:06', 'realistic', 'black-forest-labs/FLUX.1-dev', '67d944dadfb49'),
+(174, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c7c3a6859.jpg', '2025-04-09 01:05:07', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5c7c3aae92'),
+(175, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c7f0aba96.jpg', '2025-04-09 01:05:52', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5c7f0aea82'),
+(176, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c84304f4d.jpg', '2025-04-09 01:07:15', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5c84307387'),
+(177, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c866e4e3c.jpg', '2025-04-09 01:07:50', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5c866e6ad1'),
+(178, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c867d0e0e.jpg', '2025-04-09 01:07:51', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5c867d2975'),
+(179, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c86920fc1.jpg', '2025-04-09 01:07:53', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5c86922633'),
+(180, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c86a416dd.jpg', '2025-04-09 01:07:54', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5c86a42d76'),
+(181, 237, 'cat red', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c86b758a3.jpg', '2025-04-09 01:07:55', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5c86b78133'),
+(182, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5c9a9a4b3e.jpg', '2025-04-09 01:13:13', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5c9a9a6d88'),
+(183, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5ca1b06a87.jpg', '2025-04-09 01:15:07', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5ca1b08661'),
+(184, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5ca34d6c39.jpg', '2025-04-09 01:15:32', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5ca34d894b'),
+(185, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5ca74de546.jpg', '2025-04-09 01:16:36', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5ca74dfb42'),
+(186, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cacd8591c.jpg', '2025-04-09 01:18:05', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cacd87e1e'),
+(187, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5caceb38a5.jpg', '2025-04-09 01:18:06', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5caceb539a'),
+(188, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cacfe83c2.jpg', '2025-04-09 01:18:07', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cacfea536'),
+(189, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cad0f1d15.jpg', '2025-04-09 01:18:09', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cad0f4020'),
+(190, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cad6d77f8.jpg', '2025-04-09 01:18:14', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cad6d9380'),
+(191, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cad843d16.jpg', '2025-04-09 01:18:16', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cad8461d8'),
+(192, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cad995fc9.jpg', '2025-04-09 01:18:17', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cad997f94'),
+(193, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cadaeed57.jpg', '2025-04-09 01:18:18', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cadaf0705'),
+(194, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cadcde1ae.jpg', '2025-04-09 01:18:20', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cadcdfae8'),
+(195, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cade32b6d.jpg', '2025-04-09 01:18:22', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cade34a90'),
+(196, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cadf84a94.jpg', '2025-04-09 01:18:23', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cadf86371'),
+(197, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cae0d0e41.jpg', '2025-04-09 01:18:24', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cae0d2539'),
+(198, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb89bea82.jpg', '2025-04-09 01:21:13', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cb89c092f'),
+(199, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb8b03961.jpg', '2025-04-09 01:21:15', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cb8b054d4'),
+(200, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb8c29ae3.jpg', '2025-04-09 01:21:16', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cb8c2b767'),
+(201, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb8d1764e.jpg', '2025-04-09 01:21:17', 'realistic', 'black-forest-labs/FLUX.1-dev', '67f5cb8d1a26c'),
+(202, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb8e19e06.jpg', '2025-04-09 01:21:18', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cb8e1c347'),
+(203, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb8f4c2de.jpg', '2025-04-09 01:21:19', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cb8f4e791'),
+(204, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb905644f.jpg', '2025-04-09 01:21:20', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cb9057dfd'),
+(205, 237, 'cat', '/Text-To-Image-Website-main/Text-To-Image-Website/images/67f5cb913a694.jpg', '2025-04-09 01:21:21', 'realistic', 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', '67f5cb913cbfb');
 
 -- --------------------------------------------------------
 
@@ -127,7 +150,12 @@ CREATE TABLE `invoice` (
 --
 
 INSERT INTO `invoice` (`invoice_id`, `total_price`, `created_at`, `customer_id`) VALUES
-(8, 39000.00, '2025-04-08 12:38:52', NULL);
+(8, 39000.00, '2025-04-08 12:38:52', NULL),
+(9, 39000.00, '2025-04-09 00:47:50', 236),
+(10, 39000.00, '2025-04-09 02:22:19', 238),
+(11, 39000.00, '2025-04-14 08:39:49', 240),
+(12, 39000.00, '2025-04-14 15:08:23', 241),
+(13, 39000.00, '2025-04-14 15:15:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -151,8 +179,7 @@ CREATE TABLE `models` (
 INSERT INTO `models` (`id`, `model_id`, `name`, `description`, `status`, `created_at`) VALUES
 (1, 'stabilityai/stable-diffusion-3.5-large', 'Stable Diffusion 3.5', 'General purpose, high quality image generation.', 'active', '2025-03-10 08:31:21'),
 (2, 'black-forest-labs/FLUX.1-dev', 'Flux1', 'A model specializing in abstract and surreal imagery.', 'active', '2025-03-10 08:31:21'),
-(3, 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', 'Flux-Midjourney', 'Combines the aesthetics of Flux with Midjourney\'s style.', 'active', '2025-03-10 08:31:21'),
-(10, 'af3', 'Nguyen Huu Duc', '2fs', 'active', '2025-03-18 07:59:01');
+(3, 'strangerzonehf/Flux-Midjourney-Mix2-LoRA', 'Flux-Midjourney', 'Combines the aesthetics of Flux with Midjourney\'s style.', 'active', '2025-03-10 08:31:21');
 
 -- --------------------------------------------------------
 
@@ -202,34 +229,37 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `created_at`, `role`
 (196, 'testdk', '$2y$10$HoqAQ/a7F8XSAboyTlnYfOf0l1eJ1xe2WIH0b1/Np7JzmNKov34k6', 'nnguyenhuuducc@gmail.com', '2025-03-25 03:34:51', 'customer', 20, 'no', NULL, NULL),
 (213, 'zzz', '$2y$10$JXtIOWJB6b9iTqFMKIc7aOcUQPRUdxo5/K5LBnHjLZcdZo4sN9Rwe', 'nnguyenhuzvvuducc@gmail.com', '2025-03-25 03:54:37', 'customer', 20, 'yes', '2025-03-25', '2025-06-25'),
 (228, 'adaa', '$2y$10$4xCGkXNm4WCPmxybuot4yuXzS.AK6gttGMa1FcVwUys/nDrGUkGsC', 'nnguyenhuuduaaaacc@gmail.com', '2025-03-25 04:38:44', 'customer', 20, 'no', NULL, NULL),
-(229, 'zzb', '$2y$10$2lIpCepDXYYUB/8uTo7DJehAEoSC7rtSKu06OaOSce2rIXyaJoeJq', 'nnguyenzzuuducc@gmail.com', '2025-03-25 06:25:36', 'customer', 20, 'no', '2025-03-25', '2025-02-13'),
 (230, 'az1', '$2y$10$QqoEi4f3NGsy/cEiy91pH.rIsQVa9RZ.iaqTMzlynZRzREnDGCrO.', 'nnguyenhzzzuuducc@gmail.com', '2025-03-26 02:49:57', 'customer', 20, 'yes', '2025-03-12', '2025-06-26'),
 (231, 'zbe', '$2y$10$8YHxK/lTG5I9NQGttK4/V.mxLWm9TpOnktEWxzGKmfCtZbWZ7gs0K', 'nnguyenhudsuducc@gmail.com', '2025-03-26 02:56:18', 'customer', 20, 'no', NULL, NULL),
 (232, 'acb', '$2y$10$6BKXB4GYLPDLuunvGTjbC.Ey7gIZUh4Yayc570MSK8ui5eVR9JMFe', 'nnguyenhuudducc@gmail.com', '2025-03-26 03:06:59', 'customer', 20, 'no', NULL, NULL),
-(234, 'test2003', '$2y$10$QVrfaapP.CyaKCYTexbfR.dZ2wluRBW6c6mQuRv7hrz35dX4WP532', 'test2003@gmail.com', '2025-04-08 13:37:59', 'customer', 20, 'no', NULL, NULL);
+(234, 'test2003', '$2y$10$QVrfaapP.CyaKCYTexbfR.dZ2wluRBW6c6mQuRv7hrz35dX4WP532', 'test2003@gmail.com', '2025-04-08 13:37:59', 'customer', 19, 'no', NULL, NULL),
+(235, 'zed123', '$2y$10$xT7Z2X76iJvzg0lQE7RYWueAlZpOCi4FIAlI/N2yefOSeHUGSvebS', 'zed123@gmail.com', '2025-04-09 00:42:06', 'customer', 20, 'no', NULL, NULL),
+(236, 'zcc', '$2y$10$ZJPVbuH12Wnxic9U7JIU/egJVjJtNHnWa0oLHqdrNPWMP4WE./OyS', 'zzz@gmail.com', '2025-04-09 00:44:37', 'customer', 20, 'yes', '2025-04-09', '2025-05-09'),
+(237, 'zca123', '$2y$10$vING2NnqOjcHOaSXY1YC1eQYfq.35tRHeBKzEpS.kemkgOc.pEN3K', 'nnguyenhuudxczucc@gmail.com', '2025-04-09 01:04:25', 'customer', 13, 'no', NULL, NULL),
+(238, 'test11', '$2y$10$luQCbb4mGmAM97fz7EFjTOUDsDnYXXGL96IRrkDN/alcgdVt.qksi', 'test@gmail.com', '2025-04-09 02:17:38', 'customer', 20, 'yes', '2025-04-09', '2025-05-09'),
+(239, 'test12', '$2y$10$LuiVwUGe931r9zyXRNryvOa52rwCS.F3U7EA23QFg6sfqmPiM3mKi', '', '2025-04-09 02:28:47', 'customer', 20, 'no', NULL, NULL),
+(240, 'testnotest', '$2y$10$aLmejipFKcYcebG2h3OFZeiZdIAovAnBCMifg3nbm0xFHQ5Kr4BRe', 'nnguyenhuzuducc@gmail.com', '2025-04-12 04:42:53', 'customer', 18, 'yes', '2025-04-14', '2025-05-14'),
+(241, 'testnotestt', '$2y$10$Hath.MyWqoyzss33p7qSJehSf/40r7fI4YomUqjUAJ2A/Wsbhh8Gu', 'sf@gmail.com', '2025-04-14 08:46:48', 'customer', 20, 'yes', '2025-04-14', '2025-05-14'),
+(251, 'sdvv', '$2y$10$ohMvgFySseKaQBBXB74Bt.Xn/uqIO8Jy9qrNBjmDfeSaN7S7Ez4de', 'nnguyenhuuzzzducc@gmail.com', '2025-04-14 15:19:30', 'customer', 20, 'no', NULL, NULL);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `gmail_token`
+-- Indexes for table `gmail_credentials`
 --
-ALTER TABLE `gmail_token`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `gmail_tokens`
---
-ALTER TABLE `gmail_tokens`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `gmail_credentials`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `credential_key` (`credential_key`);
 
 --
 -- Indexes for table `image_history`
 --
 ALTER TABLE `image_history`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `fk_image_history_model_id` (`model`);
 
 --
 -- Indexes for table `invoice`
@@ -258,40 +288,34 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `gmail_token`
+-- AUTO_INCREMENT for table `gmail_credentials`
 --
-ALTER TABLE `gmail_token`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `gmail_tokens`
---
-ALTER TABLE `gmail_tokens`
+ALTER TABLE `gmail_credentials`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `image_history`
 --
 ALTER TABLE `image_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=206;
 
 --
 -- AUTO_INCREMENT for table `invoice`
 --
 ALTER TABLE `invoice`
-  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `models`
 --
 ALTER TABLE `models`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=235;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=252;
 
 --
 -- Constraints for dumped tables
@@ -301,6 +325,7 @@ ALTER TABLE `users`
 -- Constraints for table `image_history`
 --
 ALTER TABLE `image_history`
+  ADD CONSTRAINT `fk_image_history_model_id` FOREIGN KEY (`model`) REFERENCES `models` (`model_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `image_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --

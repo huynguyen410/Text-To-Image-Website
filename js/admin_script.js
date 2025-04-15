@@ -319,7 +319,10 @@ $(document).ready(function () {
         url: '../admin/get_invoices.php',
         target: '#invoice-list',
         entity: 'invoice',
-        fields: ['Invoice ID', 'Customer Name', 'Total Price', 'Created At'],
+        // Thay đổi 'Customer Name' thành 'Customer Username' trong danh sách fields
+        // Hoặc giữ nguyên nếu bạn đã điều chỉnh key trong get_invoices.php như gợi ý ở trên
+        // Nếu bạn đã gán $row['customer_name'] = $row['customer_username']; trong PHP thì không cần sửa fields ở đây.
+        fields: ['Invoice ID', 'Customer Name', 'Total Price', 'Created At'], // Giữ nguyên nếu đã map key trong PHP
         modalId: '',
         page: 1,
         limit: parseInt($('#invoiceLimit').val())
