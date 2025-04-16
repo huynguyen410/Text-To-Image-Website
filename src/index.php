@@ -2,7 +2,7 @@
   include 'time_out.php'; // timeout session
   require_once 'db_connect.php';
 
-  $sql = "SELECT id, model_id, name, description FROM models WHERE status = 'active'";
+  $sql = "SELECT id, model_id, name, description FROM models WHERE status = 'active' AND deleted_at IS NULL";
   $result = mysqli_query($conn, $sql);
 
   $models = array();

@@ -5,7 +5,7 @@ require_once 'db_connect.php';
 
 // Kiểm tra xem người dùng đã đăng nhập hay chưa
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Not logged in']);
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
     exit;
 }
 
@@ -34,7 +34,19 @@ $totalPages = ceil($totalRecords / $limit);
 mysqli_stmt_close($stmtCount);
 
 // Lấy lịch sử hình ảnh với phân trang, sắp xếp theo thời gian tạo giảm dần
-$sql = "SELECT prompt, style, image_url, model FROM image_history WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$sql = "SELECT 
+            ih.prompt, 
+            ih.style, 
+            ih.image_url, 
+            ih.model_identifier_snapshot,
+            m.model_id as current_model_id,
+            m.name as model_name,
+            m.description as model_description
+        FROM image_history ih
+        LEFT JOIN models m ON ih.model_id_fk = m.id
+        WHERE ih.user_id = ? 
+        ORDER BY ih.created_at DESC 
+        LIMIT ? OFFSET ?";
 $stmt = mysqli_prepare($conn, $sql);
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);

@@ -110,9 +110,14 @@
                 <div id="models" class="admin-section d-none">
                      <div class="card shadow-sm mb-4"> 
                         <div class="card-header bg-light d-flex justify-content-between align-items-center"> 
-                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModelModal">
-                                <i class="bi bi-plus-lg me-1"></i>Add Model
-                            </button>
+                            <div>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModelModal">
+                                    <i class="bi bi-plus-lg me-1"></i>Add Model
+                                </button>
+                                <button class="btn btn-secondary btn-sm ms-2" id="toggleDeletedModels">
+                                    <i class="bi bi-archive me-1"></i>Show Deleted Models
+                                </button>
+                            </div>
                             <select id="modelLimit" class="form-select form-select-sm d-inline-block w-auto">
                                 <option value="5">5</option>
                                 <option value="10" selected>10</option>
@@ -122,6 +127,7 @@
                         </div>
                         <div class="card-body p-3"> 
                             <div id="model-list" class="table-responsive">Loading models...</div>
+                            <div id="deleted-model-list" class="table-responsive d-none">Loading deleted models...</div>
                         </div>
                     </div>
                 </div>

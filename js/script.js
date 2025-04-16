@@ -256,14 +256,35 @@ const loadHistory = async (page = 1) => {
             // Hiển thị các ảnh nếu có
             if (data.history && data.history.length > 0) {
                 data.history.forEach(item => {
+                    // Fix image URL path
+                    let imageUrl = item.image_url;
+                    
+                    // Remove any duplicate paths
+                    imageUrl = imageUrl.replace('/Text-To-Image-Website-main/Text-To-Image-Website/', '/Text-To-Image-Website/');
+                    imageUrl = imageUrl.replace('/Text-To-Image-Website/Text-To-Image-Website/', '/Text-To-Image-Website/');
+                    
+                    // Ensure the URL starts with a slash
+                    if (!imageUrl.startsWith('/')) {
+                        imageUrl = '/' + imageUrl;
+                    }
+                    
+                    // If the URL doesn't contain the base path, add it
+                    if (!imageUrl.includes('Text-To-Image-Website')) {
+                        imageUrl = '/Text-To-Image-Website' + imageUrl;
+                    }
+                    
+                    // For debugging
+                    console.log('Original URL:', item.image_url);
+                    console.log('Processed URL:', imageUrl);
+                    
                     container.innerHTML += `
                         <div class="col-md-3 mb-3">
                             <div class="card">
-                                <img src="${item.image_url}" class="card-img-top" alt="Image">
+                                <img src="${imageUrl}" class="card-img-top" alt="Image" onerror="this.src='../images/img-1.jpg'">
                                 <div class="card-body">
                                     <h5 class="card-title">Prompt: ${item.prompt}</h5>
                                     <p class="card-text">Style: ${item.style}</p>
-                                    <p class="card-text">Model: ${item.model}</p>
+                                    <p class="card-text">Model: ${item.model_name || item.model_identifier_snapshot}</p>
                                 </div>
                             </div>
                         </div>

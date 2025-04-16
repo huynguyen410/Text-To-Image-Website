@@ -26,167 +26,109 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$prompt = mysqli_real_escape_string($conn, $_POST['prompt'] ?? '');
-$style = mysqli_real_escape_string($conn, $_POST['style'] ?? '');
-$image_data = $_POST['image_data'] ?? '';
-$blob_size = floatval($_POST['blob_size'] ?? 0);
-$model_id = mysqli_real_escape_string($conn, $_POST['model_id'] ?? '');
 
-error_log("User ID: $user_id");
-error_log("Prompt: $prompt, Style: $style, Model ID: $model_id, Blob Size: $blob_size");
-
-if (empty($prompt) || empty($image_data) || empty($model_id)) {
-    error_log("Thiếu dữ liệu: " . print_r($_POST, true));
-    echo json_encode(['success' => false, 'message' => 'Thiếu dữ liệu bắt buộc']);
+// Get data from POST since we're using FormData
+if (!isset($_POST['prompt']) || !isset($_POST['style']) || !isset($_POST['image_data']) || !isset($_POST['model_id'])) {
+    error_log("Missing required fields. Received: " . print_r($_POST, true));
+    echo json_encode(['success' => false, 'message' => 'Missing required fields']);
     exit;
 }
 
-if ($blob_size > 2000000) {
-    error_log("Blob size too large: " . $blob_size);
-    echo json_encode(['success' => false, 'message' => 'Blob size too large']);
-    exit;
+$prompt = $_POST['prompt'];
+$style = $_POST['style'];
+$image_data = $_POST['image_data'];
+$model_identifier = $_POST['model_id'];
+
+// Create images directory if it doesn't exist
+$upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/Text-To-Image-Website/images/';
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
 }
 
-if (!preg_match('/^data:image\/(jpeg|png|gif);base64,/', $image_data)) {
-    error_log("Invalid base64: " . substr($image_data, 0, 100));
-    echo json_encode(['success' => false, 'message' => 'Invalid base64 data']);
-    exit;
-}
+// Extract the actual base64 data
+$image_parts = explode(";base64,", $image_data);
+$image_base64 = isset($image_parts[1]) ? $image_parts[1] : $image_data;
 
-// Cập nhật upload directory theo đường dẫn mới
-$upload_dir = '/Text-To-Image-Website-main/Text-To-Image-Website/images/';
+// Generate unique filename
 $filename = uniqid() . '.jpg';
-$file_path = $_SERVER['DOCUMENT_ROOT'] . $upload_dir . $filename;
-$image_url = $upload_dir . $filename;
+$file_path = $upload_dir . $filename;
 
-error_log("Document root: " . $_SERVER['DOCUMENT_ROOT']);
-error_log("Upload dir: " . $upload_dir);
-error_log("Full file path: " . $file_path);
-
-// Kiểm tra nếu thư mục không tồn tại thì tạo mới
-$directory = dirname($file_path);
-if (!file_exists($directory)) {
-    error_log("Directory does not exist: " . $directory . " - attempting to create it.");
-    if (!mkdir($directory, 0777, true)) {
-        error_log("Failed to create directory: " . $directory);
-        echo json_encode(['success' => false, 'message' => 'Thư mục không tồn tại và không thể tạo: ' . $directory]);
-        exit;
-    } else {
-        error_log("Directory created: " . $directory);
-    }
-}
-
-if (!is_writable($directory)) {
-    error_log("Not writable: " . $directory);
-    echo json_encode(['success' => false, 'message' => 'Không có quyền ghi vào ' . $directory]);
+// Save the image file
+$success = file_put_contents($file_path, base64_decode($image_base64));
+if (!$success) {
+    error_log("Failed to save image file to: " . $file_path);
+    echo json_encode(['success' => false, 'message' => 'Failed to save image file']);
     exit;
 }
 
-$decoded_image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $image_data));
-if ($decoded_image === false) {
-    error_log("Decode failed: " . substr($image_data, 0, 100));
-    echo json_encode(['success' => false, 'message' => 'Failed to decode base64']);
-    exit;
+// Create relative URL path for database
+$image_url = '/Text-To-Image-Website/images/' . $filename;
+
+// Get model_id_fk from models table
+$modelSql = "SELECT id FROM models WHERE model_id = ? AND deleted_at IS NULL LIMIT 1";
+$modelStmt = $conn->prepare($modelSql);
+$modelStmt->bind_param("s", $model_identifier);
+$modelStmt->execute();
+$modelResult = $modelStmt->get_result();
+$model_id_fk = null;
+
+if ($modelRow = $modelResult->fetch_assoc()) {
+    $model_id_fk = $modelRow['id'];
 }
+$modelStmt->close();
 
-if (file_put_contents($file_path, $decoded_image) === false) {
-    $error = error_get_last();
-    error_log("File write failed: " . print_r($error, true));
-    echo json_encode(['success' => false, 'message' => 'Failed to save file: ' . ($error['message'] ?? 'Unknown')]);
-    exit;
-}
-
-error_log("File written successfully: " . $file_path);
-
-$max_history_count = 100;
+// Check if user has reached the history limit
 $sql_count = "SELECT COUNT(DISTINCT creation_id) AS history_count FROM image_history WHERE user_id = ?";
-$stmt_count = mysqli_prepare($conn, $sql_count);
-if (!$stmt_count) {
-    error_log("Prepare count failed: " . mysqli_error($conn));
-    echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);
-    exit;
-}
-mysqli_stmt_bind_param($stmt_count, "i", $user_id);
-mysqli_stmt_execute($stmt_count);
-$result_count = mysqli_stmt_get_result($stmt_count);
-$row_count = mysqli_fetch_assoc($result_count);
-$history_count = $row_count['history_count'] ?? 0;
-error_log("Current history count: " . $history_count);
-mysqli_stmt_close($stmt_count);
+$stmt_count = $conn->prepare($sql_count);
+$stmt_count->bind_param("i", $user_id);
+$stmt_count->execute();
+$history_count = $stmt_count->get_result()->fetch_assoc()['history_count'];
+$stmt_count->close();
 
-if ($history_count >= $max_history_count) {
+if ($history_count >= 10) {
+    // Get the oldest record
     $sql_oldest = "SELECT MIN(created_at) AS oldest_created_at FROM image_history WHERE user_id = ?";
-    $stmt_oldest = mysqli_prepare($conn, $sql_oldest);
-    if (!$stmt_oldest) {
-        error_log("Prepare oldest failed: " . mysqli_error($conn));
-        echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);
-        exit;
-    }
-    mysqli_stmt_bind_param($stmt_oldest, "i", $user_id);
-    mysqli_stmt_execute($stmt_oldest);
-    $result_oldest = mysqli_stmt_get_result($stmt_oldest);
-    $row_oldest = mysqli_fetch_assoc($result_oldest);
-    $oldest_created_at = $row_oldest['oldest_created_at'];
-    error_log("Oldest created_at: " . $oldest_created_at);
-    mysqli_stmt_close($stmt_oldest);
+    $stmt_oldest = $conn->prepare($sql_oldest);
+    $stmt_oldest->bind_param("i", $user_id);
+    $stmt_oldest->execute();
+    $oldest_date = $stmt_oldest->get_result()->fetch_assoc()['oldest_created_at'];
+    $stmt_oldest->close();
 
-    if ($oldest_created_at) {
-        $sql_delete = "SELECT id, image_url FROM image_history WHERE user_id = ? AND created_at = ? LIMIT 1";
-        $stmt_delete = mysqli_prepare($conn, $sql_delete);
-        if (!$stmt_delete) {
-            error_log("Prepare delete failed: " . mysqli_error($conn));
-            echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);
-            exit;
-        }
-        mysqli_stmt_bind_param($stmt_delete, "is", $user_id, $oldest_created_at);
-        mysqli_stmt_execute($stmt_delete);
-        $result_delete = mysqli_stmt_get_result($stmt_delete);
-        $row_delete = mysqli_fetch_assoc($result_delete);
-        mysqli_stmt_close($stmt_delete);
+    // Delete the oldest record
+    $sql_delete = "SELECT id, image_url FROM image_history WHERE user_id = ? AND created_at = ? LIMIT 1";
+    $stmt_delete = $conn->prepare($sql_delete);
+    $stmt_delete->bind_param("is", $user_id, $oldest_date);
+    $stmt_delete->execute();
+    $old_record = $stmt_delete->get_result()->fetch_assoc();
+    $stmt_delete->close();
 
-        if ($row_delete) {
-            $oldest_id = $row_delete['id'];
-            $oldest_file = $_SERVER['DOCUMENT_ROOT'] . $row_delete['image_url'];
-            error_log("Deleting oldest file: " . $oldest_file);
-            if (file_exists($oldest_file)) {
-                unlink($oldest_file);
-                error_log("Oldest file deleted: " . $oldest_file);
-            } else {
-                error_log("Oldest file not found: " . $oldest_file);
-            }
-            $sql_remove = "DELETE FROM image_history WHERE id = ?";
-            $stmt_remove = mysqli_prepare($conn, $sql_remove);
-            if (!$stmt_remove) {
-                error_log("Prepare remove failed: " . mysqli_error($conn));
-                echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);
-                exit;
-            }
-            mysqli_stmt_bind_param($stmt_remove, "i", $oldest_id);
-            mysqli_stmt_execute($stmt_remove);
-            mysqli_stmt_close($stmt_remove);
-            error_log("Oldest history record removed: ID = " . $oldest_id);
+    if ($old_record) {
+        // Delete the old image file if it exists
+        $old_image_path = $_SERVER['DOCUMENT_ROOT'] . parse_url($old_record['image_url'], PHP_URL_PATH);
+        if (file_exists($old_image_path)) {
+            unlink($old_image_path);
         }
+
+        // Delete the old record
+        $sql_delete_record = "DELETE FROM image_history WHERE id = ?";
+        $stmt_delete_record = $conn->prepare($sql_delete_record);
+        $stmt_delete_record->bind_param("i", $old_record['id']);
+        $stmt_delete_record->execute();
+        $stmt_delete_record->close();
     }
 }
 
-$creation_id = uniqid();
-error_log("Creation ID: " . $creation_id);
-$sql = "INSERT INTO image_history (user_id, prompt, style, image_url, created_at, `model`, creation_id) VALUES (?, ?, ?, ?, NOW(), ?, ?)";
-$stmt = mysqli_prepare($conn, $sql);
-if (!$stmt) {
-    error_log("Prepare insert failed: " . mysqli_error($conn));
-    echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);
-    exit;
-}
-mysqli_stmt_bind_param($stmt, "isssss", $user_id, $prompt, $style, $image_url, $model_id, $creation_id);
-if (mysqli_stmt_execute($stmt)) {
-    error_log("Image saved to history successfully. Creation ID: " . $creation_id);
-    echo json_encode(['success' => true, 'message' => 'Image saved to history']);
+// Insert new record with model_id_fk
+$sql_insert = "INSERT INTO image_history (user_id, prompt, style, image_url, model_identifier_snapshot, model_id_fk) VALUES (?, ?, ?, ?, ?, ?)";
+$stmt_insert = $conn->prepare($sql_insert);
+$stmt_insert->bind_param("issssi", $user_id, $prompt, $style, $image_url, $model_identifier, $model_id_fk);
+
+if ($stmt_insert->execute()) {
+    echo json_encode(['success' => true, 'message' => 'Image history saved successfully']);
 } else {
-    error_log("Execute insert failed: " . mysqli_error($conn));
-    echo json_encode(['success' => false, 'message' => 'SQL error: ' . mysqli_error($conn)]);
+    echo json_encode(['success' => false, 'message' => 'Error saving image history: ' . $conn->error]);
 }
-mysqli_stmt_close($stmt);
-mysqli_close($conn);
-exit;
+
+$stmt_insert->close();
+$conn->close();
 ?>

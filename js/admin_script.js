@@ -570,4 +570,165 @@ $(document).ready(function () {
         };
         return str.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
+
+    // Config for deleted models
+    const deletedModelConfig = {
+        url: '../admin/get_deleted_models.php',
+        target: '#deleted-model-list',
+        entity: 'model',
+        fields: ['ID', 'Model ID', 'Name', 'Description', 'Status', 'Deleted At'],
+        modalId: 'editModelModal'
+    };
+
+    // Toggle between active and deleted models
+    let showingDeletedModels = false;
+    $('#toggleDeletedModels').on('click', function() {
+        showingDeletedModels = !showingDeletedModels;
+        const $btn = $(this);
+        const $modelList = $('#model-list');
+        const $deletedModelList = $('#deleted-model-list');
+        
+        if (showingDeletedModels) {
+            $btn.html('<i class="bi bi-list me-1"></i>Show Active Models');
+            $modelList.addClass('d-none');
+            $deletedModelList.removeClass('d-none');
+            loadListWithRestore(deletedModelConfig);
+        } else {
+            $btn.html('<i class="bi bi-archive me-1"></i>Show Deleted Models');
+            $modelList.removeClass('d-none');
+            $deletedModelList.addClass('d-none');
+            loadList(modelConfig);
+        }
+    });
+
+    // Separate function for loading deleted models with restore button
+    function loadListWithRestore(config) {
+        const listContainer = $(config.target);
+        listContainer.html('<div class="d-flex justify-content-center align-items-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+        $.ajax({
+            url: config.url,
+            type: 'GET',
+            data: {
+                page: config.page || 1,
+                limit: config.limit || 10
+            },
+            success: function(data) {
+                if (data.success) {
+                    let html = `<table class="table table-hover">
+                        <thead>
+                            <tr>
+                                ${config.fields.map(field => `<th>${field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}</th>`).join('')}
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    if (data[config.entity] && data[config.entity].length > 0) {
+                        data[config.entity].forEach((item) => {
+                            html += '<tr>';
+                            config.fields.forEach((field) => {
+                                let value = item[field.toLowerCase().replace(/\s+/g, '_')];
+                                let displayValue = value;
+                                let tdClass = '';
+
+                                if (field === 'Status') {
+                                    displayValue = (value && String(value).toLowerCase() === 'active')
+                                        ? '<span class="badge bg-success">Active</span>'
+                                        : '<span class="badge bg-warning text-dark">Inactive</span>';
+                                    tdClass = 'text-center';
+                                } else if (field === 'Deleted At') {
+                                    displayValue = value ? new Date(value).toLocaleString() : '-';
+                                } else {
+                                    displayValue = value !== null ? escapeHtml(value) : '-';
+                                }
+
+                                html += `<td${tdClass ? ' class="' + tdClass + '"' : ''}>${displayValue}</td>`;
+                            });
+
+                            html += `<td>
+                                <button class="btn btn-sm btn-success restore-model" data-id="${item.id}" title="Restore model">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                            </td>`;
+                            html += '</tr>';
+                        });
+                    } else {
+                        const colspan = config.fields.length + 1;
+                        html += `<tr><td colspan="${colspan}" class="text-center text-muted p-3">No deleted models found.</td></tr>`;
+                    }
+
+                    html += '</tbody></table>';
+
+                    // Add pagination if needed
+                    if (data.total_pages > 1) {
+                        html += generatePagination(data.page, data.total_pages);
+                    }
+
+                    listContainer.html(html);
+
+                    // Add event handlers for pagination
+                    listContainer.find('.page-link').on('click', function(e) {
+                        e.preventDefault();
+                        const page = $(this).data('page');
+                        if (page) {
+                            loadListWithRestore({ ...config, page: page });
+                        }
+                    });
+
+                    // Add restore functionality
+                    listContainer.find('.restore-model').on('click', function() {
+                        const id = $(this).data('id');
+                        showConfirmationModal(
+                            'Confirm Model Restoration',
+                            'Are you sure you want to restore this model?',
+                            function() {
+                                $.ajax({
+                                    url: '../admin/restore_model.php',
+                                    type: 'POST',
+                                    data: { id: id },
+                                    dataType: 'json',
+                                    success: function(response) {
+                                        showInfoModal(
+                                            response.success ? 'Success' : 'Error',
+                                            response.message,
+                                            response.success
+                                        );
+                                        if (response.success) {
+                                            // Reload both lists after successful restoration
+                                            setTimeout(() => {
+                                                loadListWithRestore(config);
+                                                loadList(modelConfig);
+                                            }, 500);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error("Restore Error:", status, error);
+                                        let errorMsg = 'Failed to restore model';
+                                        if (xhr.responseText) {
+                                            try {
+                                                const response = JSON.parse(xhr.responseText);
+                                                if (response.message) {
+                                                    errorMsg = response.message;
+                                                }
+                                            } catch (e) {
+                                                console.error("Error parsing response:", e);
+                                            }
+                                        }
+                                        showInfoModal('Error', errorMsg, false);
+                                    }
+                                });
+                            }
+                        );
+                    });
+                } else {
+                    showInfoModal('Error Loading Data', data.message || 'Failed to load deleted models list.', false);
+                    listContainer.html(`<div class="alert alert-warning text-center m-3">Could not load deleted models. ${escapeHtml(data.message || '')}</div>`);
+                }
+            },
+            error: function() {
+                listContainer.html('<div class="alert alert-danger text-center m-3">Failed to load deleted models due to a network or server error.</div>');
+            }
+        });
+    }
 });

@@ -18,19 +18,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
-        // Use soft delete instead of hard delete
-        $sql = "UPDATE models SET deleted_at = NOW() WHERE id = ?";
+        // Restore model by setting deleted_at to NULL
+        $sql = "UPDATE models SET deleted_at = NULL WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
-                echo json_encode(['success' => true, 'message' => 'Model marked as deleted successfully']);
+                echo json_encode(['success' => true, 'message' => 'Model restored successfully']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Model not found or already deleted']);
+                echo json_encode(['success' => false, 'message' => 'Model not found or already restored']);
             }
         } else {
-            echo json_encode(['success' => false, 'message' => 'Error marking model as deleted: ' . $conn->error]);
+            echo json_encode(['success' => false, 'message' => 'Error restoring model: ' . $conn->error]);
         }
         
         $stmt->close();
@@ -42,4 +42,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $conn->close();
-?>
+?> 
