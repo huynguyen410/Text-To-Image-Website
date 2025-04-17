@@ -18,7 +18,7 @@ if ($page < 1) {
 $offset = ($page - 1) * $limit;
 
 // Lấy tổng số dòng
-$countSql = "SELECT COUNT(*) AS total FROM models";
+$countSql = "SELECT COUNT(*) AS total FROM models WHERE deleted_at IS NULL";
 $countResult = mysqli_query($conn, $countSql);
 if (!$countResult) {
      echo json_encode(['success' => false, 'message' => 'Count Query Error: ' . mysqli_error($conn)]);
@@ -33,7 +33,8 @@ $sql = "SELECT id, model_id, name, description, status,
         CASE WHEN deleted_at IS NOT NULL THEN 'deleted' ELSE 'active' END as delete_status,
         deleted_at
         FROM models
-        ORDER BY deleted_at IS NULL DESC, id DESC
+        WHERE deleted_at IS NULL
+        ORDER BY id ASC
         LIMIT ? OFFSET ?";
 
 $stmt = mysqli_prepare($conn, $sql);

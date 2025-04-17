@@ -80,7 +80,7 @@ $(document).ready(function () {
     });
 
     // Hàm load danh sách có phân trang
-    function loadList({ url, target, entity, fields, modalId, page = 1, limit = 10 }) {
+    function loadList({ url, target, entity, fields, modalId, page = 1, limit = 10, sort = 'id', order = 'asc' }) {
         const listContainer = $(target);
         // Show loading spinner
         listContainer.html('<div class="d-flex justify-content-center align-items-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
@@ -89,7 +89,12 @@ $(document).ready(function () {
             url: url,
             type: 'GET',
             dataType: 'json',
-            data: { page: page, limit: limit },
+            data: { 
+                page: page, 
+                limit: limit,
+                sort: sort,
+                order: order
+            },
             success: function (data) {
                 if (data.success) {
                     let html = '<table class="table table-hover table-sm align-middle table-striped">'; // Added table-striped
@@ -224,7 +229,7 @@ $(document).ready(function () {
                         e.preventDefault();
                         const newPage = $(this).data('page');
                         if (newPage && newPage !== data.page) { // Only load if page is valid and different
-                            loadList({ url, target, entity, fields, modalId, page: newPage, limit: limit });
+                            loadList({ url, target, entity, fields, modalId, page: newPage, limit: limit, sort: sort, order: order });
                         }
                     });
 
@@ -265,7 +270,7 @@ $(document).ready(function () {
                                             );
                                             if (response.success) {
                                                 // Reload the list on the current page after successful deactivation
-                                                loadList({ url, target, entity, fields, modalId, page: data.page, limit: limit });
+                                                loadList({ url, target, entity, fields, modalId, page: data.page, limit: limit, sort: sort, order: order });
                                             }
                                         },
                                         error: (xhr, status, error) => {
@@ -387,18 +392,21 @@ $(document).ready(function () {
         fields: ['ID', 'Model ID', 'Name', 'Description', 'Status'],
         modalId: 'editModelModal',
         page: 1,
-        limit: parseInt($('#modelLimit').val()) || 10
+        limit: parseInt($('#modelLimit').val()) || 10,
+        sort: 'id',
+        order: 'asc'
     };
 
     let invoiceConfig = {
         url: '../admin/get_invoices.php',
         target: '#invoice-list',
         entity: 'invoice',
-        // Assuming PHP maps 'customer_username' to 'customer_name' in the response
         fields: ['Invoice ID', 'Customer Name', 'Total Price', 'Created At'],
-        modalId: '', // No edit modal for invoices in this setup
+        modalId: '',
         page: 1,
-        limit: parseInt($('#invoiceLimit').val()) || 10
+        limit: parseInt($('#invoiceLimit').val()) || 10,
+        sort: 'id',
+        order: 'asc'
     };
 
     // Tải danh sách ban đầu
